@@ -67,7 +67,7 @@ export default function notebookDatabaseRoutes(addEndpoint) {
 
         db.asTransaction(async () => {
             for (const update of updates) {
-                logDb("Updating flashcard learning data:", update);
+                // logDb("Updating flashcard learning data:", update);
                 await db.run(db.getQueryOrThrow("flashcards.update_flashcard_learning_history"), update);
             }
         });

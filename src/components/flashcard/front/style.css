@@ -28,3 +28,21 @@
     border-radius: 1px;
     background-color: var(--color-border);
 }
+
+.flashcard_task_front_canvas {
+    width: 300px;
+    max-height: 300px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-background-secondary);
+    overflow: hidden;
+}
+
+.flashcard_task_front_text_caption {
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+}

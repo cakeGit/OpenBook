@@ -1,8 +1,10 @@
 function isMastered(flashcard) {
-    return flashcard.learningHistory1 === 1 &&
-        flashcard.learningHistory2 === 1 &&
-        flashcard.learningHistory3 === 1 &&
-        flashcard.learningHistory4 === 1;
+    return (
+        flashcard.learningHistory1 === 3 &&
+        flashcard.learningHistory2 === 3 &&
+        flashcard.learningHistory3 === 3 &&
+        flashcard.learningHistory4 === 3
+    );
 }
 
 /**
@@ -18,7 +20,7 @@ export function collectFlashcardSessionData(
 ) {
     let totalConfidence = 0;
 
-    const flashcardLearningStacks = {};//Each learning stack is the time ordered list of confidences for that flashcard
+    const flashcardLearningStacks = {}; //Each learning stack is the time ordered list of confidences for that flashcard
     for (const update of flashcardLearningUpdates) {
         if (!flashcardLearningStacks[update.flashcardLinkId]) {
             flashcardLearningStacks[update.flashcardLinkId] = [];
@@ -35,23 +37,38 @@ export function collectFlashcardSessionData(
     let totalFlashcardsStudied = Object.keys(flashcardLearningStacks).length;
     let totalReviews = flashcardLearningUpdates.length;
     let averageConfidence = totalConfidence / totalReviews;
-    //Coded statistic, average confidence is 3(Hard)-1(Easy), it needs to be mapped to 0(0% correct)-100(100% correct) scale
-    let averageAccuracy = 1 - (averageConfidence - 1) / 2;
-    
+    //Coded statistic, average confidence is 3(Easy)-1(Hard), it needs to be mapped to 1(100% correct)-0(0% correct) scale
+    let averageAccuracy = (averageConfidence - 1) / 2;
+    let flashcardsMasteredTotal = 0; //Number of flashcards in the set that reached mastery
+    let lastFlashcardsMasteredTotal = 0;
+
     //Optional statistics to be hidden if 0,
     let newFlashcards = 0;
-    let flashcardsMastered = 0; //Defined as having 4 consecutive 'easy' reviews
-    
+    let flashcardsMasteredThisSession = 0; //Defined as having 4 consecutive 'easy' reviews
+
     for (const flashcard of finalData) {
-        const initialFlashcard = initialData.find((fc) => fc.flashcardLinkId === flashcard.flashcardLinkId);
-        if (isMastered(flashcard) && !isMastered(initialFlashcard)) {
-            flashcardsMastered += 1;
+        const initialFlashcard = initialData.find(
+            (fc) => fc.flashcardLinkId === flashcard.flashcardLinkId,
+        );
+        const cardNowMastered = isMastered(flashcard);
+        const cardPreviouslyMastered = isMastered(initialFlashcard);
+        if (cardNowMastered) {
+            if (!cardPreviouslyMastered) {
+                flashcardsMasteredThisSession += 1;
+            }
+            flashcardsMasteredTotal += 1;
         }
-        if (!initialFlashcard.lastLearnedTime || initialFlashcard.lastLearnedTime === 0) {
+        if (cardPreviouslyMastered) {
+            lastFlashcardsMasteredTotal += 1;
+        }
+        if (
+            !initialFlashcard.lastLearnedTime ||
+            initialFlashcard.lastLearnedTime === 0
+        ) {
             newFlashcards += 1;
         }
     }
-    
+
     return {
         flashcardLearningStacks,
         statistics: {
@@ -59,9 +76,14 @@ export function collectFlashcardSessionData(
             totalReviews,
             averageConfidence,
             averageAccuracy,
+            setMastery: flashcardsMasteredTotal / totalFlashcardsStudied,
+            setMasteryChange:
+                (flashcardsMasteredTotal - lastFlashcardsMasteredTotal) / totalFlashcardsStudied,
             newFlashcards: newFlashcards > 0 ? newFlashcards : undefined,
-            flashcardsMastered: flashcardsMastered > 0 ? flashcardsMastered : undefined,
+            flashcardsMastered:
+                flashcardsMasteredThisSession > 0
+                    ? flashcardsMasteredThisSession
+                    : undefined,
         },
     };
-    
 }

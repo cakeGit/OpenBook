@@ -1,5 +1,9 @@
-import { logEditor } from "../../logger.mjs";
-import { ALL_FIELDS_PRESENT, VALID_PAGE_NAME } from "../foundation_safe/validations.js";
+import { logEditor, logWeb } from "../../logger.mjs";
+import {
+    ALL_FIELDS_PRESENT,
+    VALID_PAGE_NAME,
+    VALID_RECENT_LAST_EDITED_TIMESTAMP,
+} from "../foundation_safe/validations.js";
 import { ACTIVE_NOTEBOOK_STRUCTURE_MANAGER } from "../structure_editor/notebookStructureEditorSocket.mjs";
 
 export function handleRequest(activePage, ws, msg) {
@@ -62,20 +66,18 @@ export function handleRequest(activePage, ws, msg) {
         const safeProperties = ["name", "lastModifiedTimestamp"];
         const propertyValidators = {
             name: VALID_PAGE_NAME,
-            lastModifiedTimestamp: VALID_RECENT_TIMESTAMP
+            lastModifiedTimestamp: VALID_RECENT_LAST_EDITED_TIMESTAMP,
         };
 
         const prevName = activePage.metadata.name;
 
         for (const prop of safeProperties) {
-            if (propertyValidators[prop]) {
-                let validation = propertyValidators[prop].test({
-                    [prop]: metadata[prop],
-                });
-                validation.throwRequestErrorIfInvalid();
-            }
-
             if (metadata[prop] !== undefined) {
+                if (propertyValidators[prop]) {
+                    let validation = propertyValidators[prop].test(metadata[prop]);
+                    validation.throwRequestErrorIfInvalid();
+                }
+
                 activePage.metadata[prop] = metadata[prop];
             }
         }
@@ -87,11 +89,16 @@ export function handleRequest(activePage, ws, msg) {
 
         //If the page name changed, we will need to find active notebook structures and update them
         if (metadata.name && metadata.name !== prevName) {
-            ACTIVE_NOTEBOOK_STRUCTURE_MANAGER.forAllActiveElements((activeNotebook, notebookId) => {
-                if (notebookId === activePage.metadata.notebookId) {
-                    activeNotebook.updatePageNameInStructure(activePage.metadata.pageId, metadata.name);
-                }
-            });
+            ACTIVE_NOTEBOOK_STRUCTURE_MANAGER.forAllActiveElements(
+                (activeNotebook, notebookId) => {
+                    if (notebookId === activePage.metadata.notebookId) {
+                        activeNotebook.updatePageNameInStructure(
+                            activePage.metadata.pageId,
+                            metadata.name,
+                        );
+                    }
+                },
+            );
         }
     } else {
         logEditor("Unknown page server editor message type:", msg.type);

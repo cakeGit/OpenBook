@@ -12,16 +12,17 @@ export function PageFlashcardsBlock({ blockId, data, pageRef, children, ref }) {
         "flashcard",
     );
 
-    const [collapsed, setCollapsed] = useState(false); //Local state, doesent sync to page data
+    const [collapsed, setCollapsed] = useState(false); //Local state, doesent sync to page data, determines if flashcards are shown
 
-    function addNewFlashcard() {
+    function addNewFlashcard() {//Called on click of the + button
         pageRef.current.createNewBlockInside("flashcard", blockId);
     }
 
     return (
         <div ref={ref} className="flashcards_block_container">
             <h2>
-                Flashcards{" "}
+                Flashcards&nbsp;
+                {/* Collapse/Expand button */}
                 <button onClick={() => setCollapsed(!collapsed)}>
                     {collapsed ? "Expand" : "Collapse"}
                 </button>
@@ -30,7 +31,7 @@ export function PageFlashcardsBlock({ blockId, data, pageRef, children, ref }) {
                 <>
                     <AppLineBreak />
                     <div className="flashcards_content">
-                        {subcontainerElement}
+                        {subcontainerElement}{/*Flashcards get rendered into here*/}
                         <FlexCenter>
                             <button
                                 onClick={addNewFlashcard}

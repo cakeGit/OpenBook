@@ -26,7 +26,10 @@ function trySubmitNameChange(
 
     const validity = VALID_PAGE_NAME.test(newName);
     if (validity.isValid) {
-        if (newName !== pageRef.current.metadata.name) return; //Valid, but no change, ignore
+        if (newName === pageRef.current.metadata.name) return; //Valid, but no change, ignore
+        console.log("Submitting name change to:", newName);
+
+        pageRef.current.metadata.name = newName;
         pageNameRef.current.textContent = newName;
         //If valid and not the same, we update the meta and send to the server
         const newMetadata = {

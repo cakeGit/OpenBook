@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { FlashcardTaskFrontDisplay } from "../../../components/flashcard/component";
+import { FlashcardTaskFrontDisplay } from "../../../components/flashcard/front/component.jsx";
 
 function FlashcardMultichoiceOption({
     flashcard,

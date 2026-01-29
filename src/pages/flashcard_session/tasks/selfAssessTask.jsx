@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlashcardTaskFrontDisplay } from "../../../components/flashcard/component.jsx";
+import { FlashcardTaskFrontDisplay } from "../../../components/flashcard/front/component.jsx";
 
 export function FlashcardSelfAssessTask({ flashcard, onComplete }) {
     const [showAnswer, setShowAnswer] = useState(false);//This is the only state needed, determines if show answer has been clicked

@@ -1,5 +1,6 @@
 import xxhash from "xxhash-wasm";
 import { BLOCK_TYPE_REGISTRY } from "./typeRegistry.mjs";
+import { getCleanNetworkBlockData } from "./localActivePage";
 
 function generateRandomUUID() {
     return crypto.randomUUID();
@@ -237,7 +238,7 @@ export class Page {
     getLocalHash() {
         const contentForHash = {};
         for (const blockId in this.content) {
-            contentForHash[blockId] = this.linkedNetHandler.getCleanNetworkBlockData(this.content[blockId])
+            contentForHash[blockId] = getCleanNetworkBlockData(this.content[blockId])
         }
         const contentString = JSON.stringify(contentForHash);
         const structureString = JSON.stringify(this.structure);
