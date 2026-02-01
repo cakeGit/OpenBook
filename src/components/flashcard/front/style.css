@@ -46,3 +46,9 @@
     font-size: 0.9em;
     color: var(--color-text-secondary);
 }
+
+.flashcard_task_front_with_canvas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

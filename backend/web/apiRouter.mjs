@@ -14,33 +14,50 @@ export class ApiRouter {
             try {
                 const result = await handler(req);
 
-                if (result.linked_auth_key) {
+                //Linked auth key responses mean that we need to set or clear cookies
+                if (result && result.linked_auth_key) {
                     //Remove the sensitive info, and set the user's cookie appropriately
-                    res.cookie("auth_key", result.linked_auth_key, {
-                        maxAge: 1000 * 60 * 60 * 24 * 100,
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'strict'
-                    });
-                    if (result.linked_auth_key !== "") {
+                    if (
+                        result.linked_auth_key !== "" &&
+                        result.linked_auth_key !== "clear"
+                    ) {
+                        res.cookie("auth_key", result.linked_auth_key, {
+                            maxAge: 1000 * 60 * 60 * 24 * 100,
+                            httpOnly: true,
+                            secure: true,
+                            sameSite: "strict",
+                        });
                         res.cookie("auth_present", "1", {
                             maxAge: 1000 * 60 * 60 * 24 * 100,
                             httpOnly: false,
                             secure: true,
-                            sameSite: 'strict'
+                            sameSite: "strict",
                         });
+                    } else {
+                        //Clear the auth key since we got a clear command
+                        res.clearCookie("auth_key");
+                        res.clearCookie("auth_present");
                     }
                     delete result.linked_auth_key;
                 }
 
-                res.json({ success: true, ...result });
+                res.json(
+                    result ? { success: true, ...result } : { success: true },
+                );
             } catch (error) {
                 if (error instanceof RequestError) {
-                    res.status(200).json({ success: false, error: error.message, effect: error.effect });
+                    res.status(200).json({
+                        success: false,
+                        error: error.message,
+                        effect: error.effect,
+                    });
                 } else {
                     logWeb("Internal server error in api:", error);
                     console.trace(error);
-                    res.status(500).json({ success: false, error: "Internal server error: " + error.message });
+                    res.status(500).json({
+                        success: false,
+                        error: "Internal server error: " + error.message,
+                    });
                 }
             }
         });

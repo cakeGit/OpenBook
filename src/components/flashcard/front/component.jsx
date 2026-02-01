@@ -10,7 +10,7 @@ export function FlashcardTaskFrontDisplay({ flashcard }) {
         <div className="flashcard_task_front_display">
             <div className="flashcard_task_front_display_inner">
                 {hasCanvasData ? (
-                    <div>
+                    <div className="flashcard_task_front_with_canvas">
                         <div className="flashcard_task_front_canvas">
                             {/* Display of the diagram from the flashcard front side */}
                             <CanvasDisplay canvasDocumentData={flashcard.frontCanvasDocumentData}/>

@@ -1,0 +1,49 @@
+.current_login_user_info {
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    padding: 2px 20px 2px 2px;
+    border-radius: 23px;
+    box-sizing: border-box;
+    border: 3px solid var(--color-soft-border);
+    gap: 8px;
+    position: absolute;
+    height: 50px;
+    bottom: 16px;
+    left: calc(25px / 2 + 5px);
+    width: calc(100% - 25px - 5px);
+}
+
+.current_login_user_profile_picture {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0;
+}
+
+.current_login_user_side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2px;
+    flex: 1;
+}
+
+.current_login_user_display_name {
+    padding-left: 2px;
+}
+
+.sign_out_button {
+    padding: 0;
+    width: min-content;
+    text-wrap: nowrap;
+    color: var(--color-error);
+    border: none;
+    background-color: transparent;
+}
+
+.sign_out_button:hover {
+    border: none;
+    text-decoration: underline;
+}

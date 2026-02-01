@@ -1,4 +1,4 @@
-.user_info_container {
+/* .user_info_container {
     display: flex;
     flex-direction: row;
     padding: 5px 5px;
@@ -16,7 +16,7 @@
 }
 
 .user_info_pfp {
-    width:40px;
+    width: 40px;
     aspect-ratio: 1;
     border-radius: 50%;
     margin-right: 10px;
@@ -27,4 +27,38 @@
     opacity: 0.75;
     margin: 0;
     font-size: 0.8em;
+} */
+
+.display_user_info {
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    padding: 2px 20px 2px 2px;
+    border-radius: 23px;
+    box-sizing: border-box;
+    border: 3px solid var(--color-soft-border);
+    gap: 8px;
+    height: 50px;
+    width: 350px;
+    margin: 25px;
+}
+
+.display_user_profile_picture {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0;
+}
+
+.display_user_side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2px;
+    flex: 1;
+}
+
+.display_user_display_name {
+    padding-left: 2px;
 }

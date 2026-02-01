@@ -37,7 +37,7 @@ code {
   --color-success-light: #D4EDDA;
   --color-text-on-success: #155724;
   --color-error: #DC3545;
-  --color-error-light: #F8D7DA;
+  --color-soft-error: #F8D7DA;
   --color-text-on-error: #721C24;
 }
 
@@ -76,4 +76,15 @@ button:hover {
 
 button:focus {
   border-color: var(--color-accent);
+}
+
+input {
+  padding: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  outline: none;
+}
+
+input:focus {
+    border: 2px solid var(--color-soft-accent);
 }

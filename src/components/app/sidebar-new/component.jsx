@@ -3,6 +3,7 @@ import "./style.css";
 import { AppSidebarLineBreak } from "./lineBreak/component.jsx";
 import { AppSidebarNoteBookSelect } from "./noteBookSelect/component.jsx";
 import { NotebookStructureView } from "./notebook_Structure/component.jsx";
+import { CurrentLoginUserInfo } from "./current_login_user_info/component.jsx";
 
 export function AppSideBar({
     currentNotebookName,
@@ -50,6 +51,10 @@ export function AppSideBar({
                 <AppSidebarLineBreak />
                 <AppSidebarNoteBookSelect currentName={currentNotebookName} />
                 <NotebookStructureView notebookId={currentNotebookId} setSidebarLock={setSidebarLock} />
+                <AppSidebarLineBreak />
+
+                <CurrentLoginUserInfo />
+
                 <div ref={sidebarRef} className="app_sidebar_pull_tab">
                     <svg
                         className="chevron"

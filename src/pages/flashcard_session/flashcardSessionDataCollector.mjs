@@ -34,6 +34,7 @@ export function collectFlashcardSessionData(
     }
 
     //Then get statistics about the session
+    let totalCardsInSet = finalData.length;
     let totalFlashcardsStudied = Object.keys(flashcardLearningStacks).length;
     let totalReviews = flashcardLearningUpdates.length;
     let averageConfidence = totalConfidence / totalReviews;
@@ -76,9 +77,9 @@ export function collectFlashcardSessionData(
             totalReviews,
             averageConfidence,
             averageAccuracy,
-            setMastery: flashcardsMasteredTotal / totalFlashcardsStudied,
+            setMastery: flashcardsMasteredTotal / totalCardsInSet,
             setMasteryChange:
-                (flashcardsMasteredTotal - lastFlashcardsMasteredTotal) / totalFlashcardsStudied,
+                (flashcardsMasteredTotal - lastFlashcardsMasteredTotal) / totalCardsInSet,
             newFlashcards: newFlashcards > 0 ? newFlashcards : undefined,
             flashcardsMastered:
                 flashcardsMasteredThisSession > 0

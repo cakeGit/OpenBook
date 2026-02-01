@@ -82,7 +82,7 @@ export function FlashcardMultiChoiceTask({ flashcard, onComplete }) {
                 </div>
             </div>
             {submittedIndex !== null ? (
-                <button onClick={() => onComplete(questionResultRef.current, submittedIndex)} autoFocus={true}>
+                <button onClick={() => onComplete(questionResultRef.current)} autoFocus={true}>
                     Continue
                 </button>
             ) : null}

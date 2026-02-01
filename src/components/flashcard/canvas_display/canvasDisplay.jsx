@@ -19,6 +19,10 @@ export function isBlankSnapshot(canvasData) {
 }
 
 export function CanvasDisplay({ canvasDocumentData }) {
+    if (canvasDocumentData === undefined) {
+        return <></>; //No canvas data provided, so just pass, saves having to wrap this component everywhere
+    }
+
     const hasCanvasData = canvasDocumentData && canvasDocumentData.length > 0;
     const [canvasSnapshotData, setCanvasSnapshotData] = useState(null);
 

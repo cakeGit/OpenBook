@@ -96,23 +96,19 @@ function walkStructureForParentsAndOrder(
 //The content's block flashcardLinkId property must be ignored
 //Only known safe flashcard link ids can be used,
 //New flashcards need ids created
-function enforceFlashcardLinkIdsRecursively(content, flashcardLinkIds) {
+function enforceFlashcardLinkIds(content, flashcardLinkIds) {
     for (const blockId in content) {
         const block = content[blockId];
         if (block.type === "flashcard") {
-            const knownLinkId = flashcardLinkIds[block.blockId];
+            const knownLinkId = flashcardLinkIds[blockId];
             if (knownLinkId != null) {
+                //Ensure it cant be reused to try duplicate the link ID
+                delete flashcardLinkIds[blockId];
                 block.flashcardLinkId = knownLinkId;
             } else {
                 const newLinkId = generateRandomUUID();
                 block.flashcardLinkId = newLinkId;
             }
-        }
-        if (block.children) {
-            enforceFlashcardLinkIdsRecursively(
-                block.children,
-                flashcardLinkIds,
-            );
         }
     }
 }
@@ -126,7 +122,7 @@ export async function writePageToDatabase(
     const startTime = performance.now();
     logDb("Writing page", pageMeta.pageId, "to database");
 
-    //This is somewhat silly, but to avoid the client sending specific block IDs that collide in the database,
+    //This is somewhat odd, but to avoid the client sending specific block IDs that collide in the database,
     //We can shuffle the block IDs here to new ones, that we know are valid and wont corrupt the database
     //However, we need to keep track of flashcard link IDs, so we fetch existing ones here, and adapt them to the new block IDs
     let sourceFlashcardLinkIds = await getExistingFlashcardLinkIdMapOfPage(
@@ -139,7 +135,7 @@ export async function writePageToDatabase(
         sourceFlashcardLinkIds,
     );
 
-    enforceFlashcardLinkIdsRecursively(content, flashcardLinkIds);
+    enforceFlashcardLinkIds(content, flashcardLinkIds);
 
     const blockParentIdMap = {};
     const blockOrderMap = {};

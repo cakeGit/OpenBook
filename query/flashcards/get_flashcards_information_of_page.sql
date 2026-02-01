@@ -8,6 +8,6 @@ FlashcardBlocks.FlashcardLinkID,
 ((LearningHistory >> 4) & 3) AS LearningHistory3,
 ((LearningHistory >> 6) & 3) AS LearningHistory4
 FROM FlashcardBlocks, Blocks
-LEFT JOIN FlashcardLearningHistory ON FlashcardBlocks.FlashcardLinkID = FlashcardLearningHistory.FlashcardLinkID
+LEFT JOIN FlashcardLearningHistory ON FlashcardBlocks.FlashcardLinkID = FlashcardLearningHistory.FlashcardLinkID AND FlashcardLearningHistory.OwnerUserID = $UserID
 WHERE Blocks.BlockID = FlashcardBlocks.BlockID
-AND Blocks.PageID = ?;
+AND Blocks.PageID = $PageID;

@@ -5,12 +5,15 @@ import { useRef } from "react";
 import { Validator } from "../../../backend/web/foundation_safe/validator.js";
 import { fetchApi } from "../../foundation/api.js";
 import { AppLineBreak } from "../../components/app/line_break/component.jsx";
+import { FlexCenter } from "../../components/app/flex_center/component.jsx";
 
+//This validator is used to validate display name input, same as the server
 const VALID_DISPLAY_NAME_VALIDATOR = new Validator("Display name")
     .notNull()
     .lengthBetween(1, 30)
     .hasNameLikeCharsOnly();
 
+//Try to submit the create account info to the server, will make an alert on failure
 function trySubmitCreateAccountInfo(displayName, jwt) {
     const displayNameValue = displayName.current.value;
     const validation = VALID_DISPLAY_NAME_VALIDATOR.test(displayNameValue);
@@ -42,8 +45,8 @@ function trySubmitCreateAccountInfo(displayName, jwt) {
 }
 
 function BuildPage() {
-    //Get the google sign in JWT token from local storage
-    let googleJWT = localStorage.getItem("google_jwt");
+    //Get the google sign in JWT token from sessionStorage
+    let googleJWT = sessionStorage.getItem("google_jwt");
 
     //If not present, send to get account
     if (!googleJWT) {
@@ -70,22 +73,18 @@ function BuildPage() {
     let displayNameRef = useRef(null);
 
     return (
-        <PageCenterContent>
+        <FlexCenter fullHeight={true}>
             <h1>Create account</h1>
-            <AppLineBreak />
+
             <div className="setting_container">
-                <div>
-                    <div>
-                        <h3>Google account:</h3>
-                    </div>
-                    <div>
-                        <UserInfo
-                            pfp={userPicture}
-                            email={userEmail}
-                            name={userFullName}
-                        />
-                    </div>
-                </div>
+                <FlexCenter>
+                    <UserInfo
+                        pfp={userPicture}
+                        email={userEmail}
+                        name={userFullName}
+                    />
+                </FlexCenter>
+
                 <br></br>
                 <div>
                     <div>
@@ -98,24 +97,24 @@ function BuildPage() {
                         />
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <div className="create_account_button_container">
-                        <button
-                            disabled={!userInfo}
-                            onClick={() =>
-                                trySubmitCreateAccountInfo(
-                                    displayNameRef,
-                                    googleJWT,
-                                )
-                            }
-                        >
-                            Create Account
-                        </button>
-                    </div>
+            <div>
+                <div className="create_account_button_container">
+                    <button
+                        disabled={!userInfo}
+                        onClick={() =>
+                            trySubmitCreateAccountInfo(
+                                displayNameRef,
+                                googleJWT,
+                            )
+                        }
+                    >
+                        Create Account
+                    </button>
                 </div>
             </div>
-        </PageCenterContent>
+        </FlexCenter>
     );
 }
 

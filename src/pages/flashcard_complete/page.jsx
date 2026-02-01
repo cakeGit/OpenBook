@@ -10,6 +10,9 @@ function BuildPage() {
     const flashcardSessionInfo = JSON.parse(
         sessionStorage.getItem("flashcard_session_statistics"),
     );
+    const notebookId = new URLSearchParams(window.location.search).get(
+        "notebook_id"
+    );
     return (
         <PageCenterContent>
             <h1>Flashcard session complete!</h1>
@@ -44,9 +47,9 @@ function BuildPage() {
                 </div>
             </div>
             <br />
-            <a href="/flashcard_session">Do the session again</a>
+            <a href={`/flashcard_session?notebook_id=${notebookId}`}>Do the session again</a>
             <br />
-            <a href="/flashcard_select">Setup a new session</a>
+            <a href={`/flashcard_select?notebook_id=${notebookId}`}>Setup a new session</a>
             <br />
             <a href="/">Return to your notes</a>
         </PageCenterContent>

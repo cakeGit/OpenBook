@@ -31,7 +31,7 @@
 
 .multichoice_option_incorrect {
     border-color: var(--color-error);
-    background-color: var(--color-error-light);
+    background-color: var(--color-soft-error);
     color: var(--color-text-on-error);
     cursor: default;
 }
@@ -63,4 +63,78 @@
     background-color: var(--color-accent);
     transition: width 0.3s;
     height: 10px;
+}
+
+.sentence_part_container {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 20px;
+    overflow: visible;
+    text-align: center;
+}
+
+.sentence_pallette {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.sentence_builder_row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.sentence_builder_row:not(:first-child) {
+    margin-top: 10px;
+}
+
+.sentence_part {
+    text-wrap: nowrap;
+    border: 2px solid var(--color-soft-border);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 4px;
+    margin: 0 3px;
+    background-color: var(--color-pure-background);
+}
+
+.sentence_pallette_part:hover {
+    border-color: var(--color-soft-accent);
+}
+
+.sentence_builder_part:hover {
+    border-color: var(--color-soft-error);
+}
+
+.sentence_builder_drag_target {
+    position: relative;
+    width: 2px;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+}
+
+.sentence_builder_hovered_target {
+    background-color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+}
+
+.sentence_builder {
+    width: 700px;
+    padding: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-secondary-background);
+}
+
+.sentence_builder_incorrect_answer {
+    border-color: var(--color-error);
+}
+.sentence_builder_correct_answer {
+    border-color: var(--color-success);
 }

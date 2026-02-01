@@ -1,4 +1,4 @@
-import { generateMultiChoiceOptions } from "./multichoiceHelper.mjs";
+import { generateMultiChoiceOptions } from "./tasks/helper/multiChoiceHelper.mjs";
 
 function getFlashcardPriority(flashcard) {
     const l1 = flashcard.learningHistory1 || 0;
@@ -43,13 +43,22 @@ function getIntroducedNewFlashcards(averagePriority, bundleSize) {
 export function getNextFlashcardBundle(
     flashcards,
     includeMultiChoiceData,
+    excludeNonTextAnswers,
     bundleSize = 5,
 ) {
-    //Bundle size is constant, but tweakable
+    flashcards = structuredClone(flashcards); //Deep clone to avoid mutating the original data
+
+    //If we are excluding non text answers, filter them out now, so we ensure we have enough cards later
+    flashcards = flashcards.filter((flashcard) => {
+        if (excludeNonTextAnswers) {
+            return flashcard.backText != null && flashcard.backText.trim() !== "";
+        }
+        return true;
+    });
+    
     if (flashcards.length === 0) {
         throw new Error("No flashcards available to build a flashcard bundle");
     }
-    flashcards = structuredClone(flashcards); //Deep clone to avoid mutating the original data
 
     //Apply in the flashcard priority
     flashcards.forEach((flashcard) => {

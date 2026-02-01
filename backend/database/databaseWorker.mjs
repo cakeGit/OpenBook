@@ -18,7 +18,7 @@ function logTestQuery(db) {
             console.error('Error running test query "get_users":', err);
         } else {
             logDb(
-                `Test query "get_users" result: ${rows.length} users in database.`
+                `Test query "get_users" result: ${rows.length} users in database.`,
             );
         }
     });
@@ -107,9 +107,9 @@ function wrapDbForPromises(db) {
                 });
             });
         },
-        runMultiple(sql, params) {
+        async runMultiple(sql, params) {
             const tracedError = new Error(
-                "Failed to execute multiple statements"
+                "Failed to execute multiple statements",
             );
 
             //Break down the SQL in to the smaller statements
@@ -119,33 +119,23 @@ function wrapDbForPromises(db) {
                 .map((s) => s.trim())
                 .filter((s) => s.length > 0);
 
-            return new Promise((resolve, reject) => {
-                let completedStatements = 0;
-                for (const statement of statements) {
-                    //Since not all params may be used in each statement, we filter them down to just the ones used
-                    //SQL requires named parameters to have a specific format, we generally use them in the form "$param"
-                    //This means I can search for those in the statement text safely
-                    let subParams = filterForPropertiesInQuery(
-                        statement,
-                        structuredClone(params)
-                    );
+            for (const statement of statements) {
+                //Since not all params may be used in each statement, we filter them down to just the ones used
+                //SQL requires named parameters to have a specific format, we generally use them in the form "$param"
+                //This means I can search for those in the statement text safely
+                let subParams = filterForPropertiesInQuery(
+                    statement,
+                    structuredClone(params),
+                );
 
-                    db.run(statement, subParams, function (err) {
-                        if (err) {
-                            console.error(err);
-                            tracedError.cause = err;
-                            reject(tracedError);
-                            return;
-                        } else {
-                            //We need to track when all statements are complete before resolving
-                            completedStatements++;
-                            if (completedStatements === statements.length) {
-                                resolve();
-                            }
-                        }
-                    });
+                try {
+                    await this.run(statement, subParams);
+                } catch (err) {
+                    console.error(err);
+                    tracedError.cause = err;
+                    throw tracedError;
                 }
-            });
+            }
         },
     };
 }
@@ -175,7 +165,7 @@ export async function startDatabaseWorker(db) {
             logDb(
                 'Database worker received message with no type, ignoring "',
                 message,
-                '"'
+                '"',
             );
             return;
         }
@@ -192,19 +182,37 @@ function addEndpoint(type, handler) {
 
 addAllDatabaseRoutes(addEndpoint);
 
+class DatabaseResponse {
+    constructor(requestId) {
+        this.requestId = requestId;
+        this.responded = false;
+    }
+
+    success(data) {
+        process.send({ requestId: this.requestId, status: "success", data });
+        this.responded = true;
+    }
+
+    error(errorMessage) {
+        process.send({
+            requestId: this.requestId,
+            status: "error",
+            errorMessage: errorMessage,
+        });
+        this.responded = true;
+    }
+
+    isResponded() {
+        return this.responded;
+    }
+}
+
 async function handleDatabaseMessage(db, message) {
     let type = message.type;
     let requestId = message.requestId;
     let handler = requestRoutes[type];
 
-    const response = {
-        success: (data) => {
-            process.send({ requestId, status: "success", data });
-        },
-        error: (errorMessage) => {
-            process.send({ requestId, status: "error", errorMessage: errorMessage });
-        },
-    };
+    const response = new DatabaseResponse(requestId);
 
     if (!handler) {
         response.error("No handler for request type: " + type);
@@ -216,10 +224,14 @@ async function handleDatabaseMessage(db, message) {
         if (result !== undefined) {
             response.success(result);
         }
+        //Else if this was not responded, we assume this was a procedure which had no return value, but also had no errors
+        if (!response.isResponded()) {
+            response.success();
+        }
     } catch (err) {
         if (err instanceof RequestError) {
             process.send({
-                requestId,
+                requestId: requestId,
                 status: "error",
                 requestError: true,
                 errorEffect: err.effect,

@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS Blocks (
 CREATE TABLE IF NOT EXISTS FlashcardLearningHistory (
     OwnerUserID BLOB NOT NULL,
     FlashcardLinkID BLOB NOT NULL,
-    LearningHistory BLOB,
+    LearningHistory INTEGER,
     LastLearnedTime INTEGER,
 
     PRIMARY KEY (OwnerUserID, FlashcardLinkID) --Composite primary key

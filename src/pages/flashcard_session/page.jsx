@@ -7,6 +7,7 @@ import { FlashcardSelfAssessTask } from "./tasks/selfAssessTask.jsx";
 import { FlashcardMultiChoiceTask } from "./tasks/multiChoiceTask.jsx";
 import { getNextFlashcardBundle } from "./flashcardBundler.mjs";
 import { collectFlashcardSessionData } from "./flashcardSessionDataCollector.mjs";
+import { FlashcardSentenceBuilderTask } from "./tasks/sentenceBuilderTask.jsx";
 
 function applyLearningResultToFlashcard(
     flashcards,
@@ -52,6 +53,31 @@ function getLearningCode(flashcard) {
     );
 }
 
+function getNextFlashcardBundleSafe(
+    flashcards,
+    includeMultiChoiceData,
+    excludeNonTextAnswers,
+) {
+    try {
+        return getNextFlashcardBundle(
+            flashcards,
+            includeMultiChoiceData,
+            excludeNonTextAnswers,
+        );
+    } catch (e) {
+        console.error(
+            "Error getting next flashcard bundle, returning to selection page:",
+            e,
+        );
+        alert("Couldn't setup flashcard session: " + e.message);
+        const notebookId = new URLSearchParams(window.location.search).get(
+            "notebook_id",
+        );
+        window.location.href = "/flashcard_select?notebook_id=" + notebookId;
+        return [];
+    }
+}
+
 function BuildPage() {
     //Get selected pages from the session storage (from flashcard_select page)
     const selectedPageIds = JSON.parse(
@@ -76,6 +102,7 @@ function BuildPage() {
         sessionStorage.getItem("flashcard_session_flashcard_count") || "5",
     );
     const includeMultiChoiceData = sessionOption == "multi_choice";
+    const excludeNonTextAnswers = sessionOption == "sentence_builder";
 
     const flashcardLearningUpdatesRef = useRef([]);
 
@@ -86,7 +113,7 @@ function BuildPage() {
     if (loading || error) return <></>;
 
     if (!activeFlashcardBundleRef.current) {
-        activeFlashcardBundleRef.current = getNextFlashcardBundle(
+        activeFlashcardBundleRef.current = getNextFlashcardBundleSafe(
             data,
             includeMultiChoiceData,
         );
@@ -106,29 +133,29 @@ function BuildPage() {
             confidence,
         );
 
-        if (activeFlashcardBundleRef.current.length === 0) {
-            if (flashcardLearnedCount >= flashcardsInSessionCount - 1) {
-                //Finished the session, go to flashcard complete page and upload results
-                const { flashcardLearningStacks, statistics } =
-                    collectFlashcardSessionData(
-                        flashcardLearningUpdatesRef.current,
-                        data,
-                        initialData,
-                    );
-                sessionStorage.setItem(
-                    "flashcard_session_statistics",
-                    JSON.stringify(statistics),
+        if (flashcardLearnedCount >= flashcardsInSessionCount - 1) {
+            //Finished the session, go to flashcard complete page and upload results
+            const { flashcardLearningStacks, statistics } =
+                collectFlashcardSessionData(
+                    flashcardLearningUpdatesRef.current,
+                    data,
+                    initialData,
                 );
-                fetchApi("flashcards/update_flashcard_learning_data", {
-                    flashcardLearningUpdates: flashcardLearningStacks,
-                }).then(() => {
-                    window.location.href = "/flashcard_complete";
-                });
-                return;
-            }
+            sessionStorage.setItem(
+                "flashcard_session_statistics",
+                JSON.stringify(statistics),
+            );
+            fetchApi("flashcards/update_flashcard_learning_data", {
+                flashcardLearningUpdates: flashcardLearningStacks,
+            }).then(() => {
+                window.location.href = "/flashcard_complete";
+            });
+            return;
+        }
 
+        if (activeFlashcardBundleRef.current.length === 0) {
             //We need a new bundle if we're still going
-            activeFlashcardBundleRef.current = getNextFlashcardBundle(
+            activeFlashcardBundleRef.current = getNextFlashcardBundleSafe(
                 data,
                 includeMultiChoiceData,
             );
@@ -141,6 +168,7 @@ function BuildPage() {
     const TaskComponent = {
         self_assess: FlashcardSelfAssessTask,
         multi_choice: FlashcardMultiChoiceTask,
+        sentence_builder: FlashcardSentenceBuilderTask,
     }[sessionOption]; //Resolve the task component based on session option
 
     return (
