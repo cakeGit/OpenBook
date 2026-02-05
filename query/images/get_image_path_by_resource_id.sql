@@ -1,0 +1,1 @@
+SELECT ImagePath FROM ImageResources WHERE ImageResourceID = ?;

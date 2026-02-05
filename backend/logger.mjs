@@ -186,7 +186,7 @@ function getLogString(arg) {
     }
     return typeof arg === "string"
         ? arg
-        : util.inspect(arg, { showHidden: false, depth: 4, colors: true });
+        : util.inspect(arg, { showHidden: false, depth: null, colors: true });
 }
 
 function collectContent(firstArg, allArgs) {

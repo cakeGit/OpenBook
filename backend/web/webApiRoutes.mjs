@@ -4,6 +4,7 @@ import { ApiRouter } from './apiRouter.mjs';
 import userRouter from './routes/userWebRoutes.mjs';
 import notebookWebRoutes from './routes/notebookWebRoutes.mjs';
 import flashcardWebRoutes from './routes/flashcardWebRoutes.mjs';
+import imageWebRoutes from './routes/imageWebRoutes.mjs';
 
 const apiRouter = new ApiRouter(Router());
 
@@ -11,5 +12,6 @@ googleAuthRouter(apiRouter);
 userRouter(apiRouter);
 notebookWebRoutes(apiRouter);
 flashcardWebRoutes(apiRouter);
+imageWebRoutes(apiRouter);
 
 export { apiRouter };

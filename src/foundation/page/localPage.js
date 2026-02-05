@@ -1,21 +1,30 @@
 import xxhash from "xxhash-wasm";
 import { BLOCK_TYPE_REGISTRY } from "./typeRegistry.mjs";
-import { getCleanNetworkBlockData } from "./localActivePage";
-
-function generateRandomUUID() {
-    return crypto.randomUUID();
-}
+import { getCleanNetworkBlockData } from "./localPageNetHandler.js";
+import { MutablePage } from "../../../backend/web/foundation_safe/page/mutablePage.js";
 
 const hash = await xxhash();
 
-export class Page {
+export class LocalPage extends MutablePage {
     constructor(structureJSON, contentJSON) {
-        this.structure = structureJSON;
-        this.content = contentJSON;
+        super(structureJSON, contentJSON);
         this.primaryContainerRef = null;
         this.subcontainers = [];
         this.triggerStructureRerender = null;
         this.linkedNetHandler = null;
+    }
+
+    performAndSendOperation(operation) {
+        this.performOperation(operation);
+        this.checkForNetAndRun(() =>
+            this.linkedNetHandler.sendOperation(operation)
+        );
+    }
+
+    requestHistoryAction(action) {
+        this.checkForNetAndRun(() =>
+            this.linkedNetHandler.sendHistoryRequest(action)
+        );
     }
 
     removeSubcontainer(refToRemove) {
@@ -67,40 +76,20 @@ export class Page {
     }
 
     createNewBlockInside(blockType, parentBlockId, initialData = {}) {
-        const newBlockId = generateRandomUUID();
-        this.content[newBlockId] = { type: blockType, ...initialData };
-        this.insertBlock(parentBlockId, newBlockId, "inside");
+        const newBlockId = globalThis.crypto.randomUUID();
+        this._addBlock(parentBlockId, newBlockId, { type: blockType, ...initialData }, "inside");
         this.sendNewBlock(parentBlockId, newBlockId, "inside");
         this.triggerStructureRerender();
         return newBlockId;
     }   
 
     createNewBlock(blockType, blockIdBelow, initialData = {}) {
-        const newBlockId = generateRandomUUID();
-        this.content[newBlockId] = { type: blockType, ...initialData };
+        const newBlockId = globalThis.crypto.randomUUID();
+        this._addBlock(blockIdBelow, newBlockId, { type: blockType, ...initialData });
 
-        this.insertBlock(blockIdBelow, newBlockId);
         this.sendNewBlock(blockIdBelow, newBlockId);
         this.triggerStructureRerender();
         return newBlockId;
-    }
-
-    insertBlock(adjacentBlockId, newBlockId, direction = "after") {
-        if (!adjacentBlockId) {
-            //Insert at start
-            this.structure.children.unshift({ blockId: newBlockId });
-            return;
-        }
-        this.findAndPerform(adjacentBlockId, (children, index) => {
-            if (direction === "after") {
-                children.splice(index + 1, 0, { blockId: newBlockId });
-            } else if (direction === "inside") {
-                if (!children[index].children) {
-                    children[index].children = [];
-                }
-                children[index].children.push({ blockId: newBlockId });
-            }
-        });
     }
 
     addTargetableSubcomponentContainer(subcontainer) {
@@ -140,62 +129,6 @@ export class Page {
         this.subcontainers = validContainers;
     }
 
-    getAllBlockIds() {
-        const blockIds = new Set();
-
-        function walkStructure(node) {
-            if (node.blockId) {
-                blockIds.add(node.blockId);
-            }
-            if (node.children) {
-                node.children.forEach(walkStructure);
-            }
-        }
-
-        walkStructure(this.structure);
-        return blockIds;
-    }
-
-    //Performs a tree walk to find the children of a blockId.
-    getStructureChildren(blockId) {
-        function walkTreeForBlockId(node, blockId) {
-            if (node.blockId === blockId) return node.children || [];
-            if (node.children) {
-                for (const child of node.children) {
-                    const result = walkTreeForBlockId(child, blockId);
-                    if (result) return result;
-                }
-            }
-            return null;
-        }
-        return walkTreeForBlockId(this.structure, blockId) || [];
-    }
-
-    deleteBlock(blockId) {
-        delete this.content[blockId];
-        function walkAndDelete(node, blockId) {
-            if (!node.children) return;
-
-            const index = node.children.findIndex(
-                (child) => child.blockId === blockId
-            );
-
-            if (index !== -1) {
-                node.children.splice(index, 1);
-                return;
-            }
-
-            for (const child of node.children) {
-                if (walkAndDelete(child, blockId)) {
-                    return;
-                }
-            }
-            return;
-        }
-
-        walkAndDelete(this.structure, blockId);
-    }
-
     /**
      * The primary container is always included, where the containing blockId is undefined.
      * @returns List in the form {element: HTMLElement, blockId: string (undefined for primary container)}
@@ -219,20 +152,6 @@ export class Page {
         }
 
         return containers;
-    }
-
-    findAndPerform(targetBlockId, performer, currentNode = this.structure) {
-        if (!currentNode.children) {
-            return;
-        }
-        for (let i = 0; i < currentNode.children.length; i++) {
-            const child = currentNode.children[i];
-            if (child.blockId === targetBlockId) {
-                performer(currentNode.children, i);
-                return;
-            }
-            this.findAndPerform(targetBlockId, performer, child);
-        }
     }
 
     getLocalHash() {

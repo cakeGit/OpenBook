@@ -1,0 +1,26 @@
+.floating_history_buttons {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    border: 3px solid var(--color-border);
+    background-color: var(--color-pure-background);
+    border-bottom-left-radius: 15px;
+    width: 110px;
+    border-top: 0;
+    overflow: hidden;
+}
+
+.floating_history_buttons button {
+    all: unset;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 0.9em;
+    color: var(--color-light-text);
+    background-color: transparent;
+}
+
+.floating_history_buttons button:hover {
+    background-color: var(--color-soft-border);
+    color: var(--color-text);
+}
+

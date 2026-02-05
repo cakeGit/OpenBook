@@ -1,4 +1,5 @@
 import { alertStyle, logDb, logDbWithWarningBlinker } from "../../logger.mjs";
+import { adaptJsObjectToSql } from "../foundation/adapter.mjs";
 import {
     generateRandomUUID,
     getUUIDBlob,
@@ -25,12 +26,12 @@ function jsToSqlName(str) {
 }
 
 function replaceIdsInStructureRecursive(idConversionMap, children) {
-    for (const index in children) {
+    for (let index = children.length - 1; index >= 0; index--) {
         const child = children[index];
         const oldBlockId = child.blockId;
         const newBlockId = idConversionMap[oldBlockId];
         if (!newBlockId) {
-            delete children[index];
+            children.splice(index, 1);
             logDb("Removed child with missing block ID:", oldBlockId);
             continue;
         }
@@ -119,42 +120,49 @@ export async function writePageToDatabase(
     sourceStructure,
     sourceContent,
 ) {
-    const startTime = performance.now();
-    logDb("Writing page", pageMeta.pageId, "to database");
+    try {
+        const startTime = performance.now();
+        logDb("Writing page", pageMeta.pageId, "to database");
 
-    //This is somewhat odd, but to avoid the client sending specific block IDs that collide in the database,
-    //We can shuffle the block IDs here to new ones, that we know are valid and wont corrupt the database
-    //However, we need to keep track of flashcard link IDs, so we fetch existing ones here, and adapt them to the new block IDs
-    let sourceFlashcardLinkIds = await getExistingFlashcardLinkIdMapOfPage(
-        db,
-        pageMeta.pageId,
-    );
-    let { structure, content, flashcardLinkIds } = shuffleBlockIds(
-        sourceStructure,
-        sourceContent,
-        sourceFlashcardLinkIds,
-    );
-
-    enforceFlashcardLinkIds(content, flashcardLinkIds);
-
-    const blockParentIdMap = {};
-    const blockOrderMap = {};
-
-    walkStructureForParentsAndOrder(structure, blockParentIdMap, blockOrderMap);
-
-    // Start a transaction, this prevents constant writes with every incremental change,
-    // This also allows rollbacks when neccassary
-    const transactionStartTime = performance.now();
-    await db.asTransaction(async () => {
-        //Delete all existing blocks in this page
-        await performDatabaseWrite(
+        //This is somewhat odd, but to avoid the client sending specific block IDs that collide in the database,
+        //We can shuffle the block IDs here to new ones, that we know are valid and wont corrupt the database
+        //However, we need to keep track of flashcard link IDs, so we fetch existing ones here, and adapt them to the new block IDs
+        let sourceFlashcardLinkIds = await getExistingFlashcardLinkIdMapOfPage(
             db,
-            pageMeta,
-            content,
+            pageMeta.pageId,
+        );
+        let { structure, content, flashcardLinkIds } = shuffleBlockIds(
+            sourceStructure,
+            sourceContent,
+            sourceFlashcardLinkIds,
+        );
+
+        enforceFlashcardLinkIds(content, flashcardLinkIds);
+
+        const blockParentIdMap = {};
+        const blockOrderMap = {};
+
+        walkStructureForParentsAndOrder(
+            structure,
             blockParentIdMap,
             blockOrderMap,
         );
-        const commitStartTime = performance.now();
+
+        // Start a transaction, this prevents constant writes with every incremental change,
+        // This also allows rollbacks when neccassary
+        const transactionStartTime = performance.now();
+        let commitStartTime = 0;
+        await db.asTransaction(async () => {
+            //Delete all existing blocks in this page
+            await performDatabaseWrite(
+                db,
+                pageMeta,
+                content,
+                blockParentIdMap,
+                blockOrderMap,
+            );
+            commitStartTime = performance.now();
+        });
         const now = performance.now();
         logForOvertimeSeverity(
             now - startTime,
@@ -169,7 +177,15 @@ export async function writePageToDatabase(
             now - commitStartTime,
             "ms was commit)",
         );
-    });
+    } catch (err) {
+        logDb("Error writing page to database:", err);
+        logDb("Page content for serialization:", {
+            pageMeta,
+            sourceStructure,
+            sourceContent,
+        });
+        throw err;
+    }
 }
 
 function convertToSQLParams(inputData) {
@@ -189,25 +205,23 @@ function getParametersOfBlockForWrite(
     pageMeta,
     blockOrderMap,
 ) {
-    return convertToSQLParams({
-        ...blockData,
-        //Conversion for documentData field in DrawingCanvasBlocks so it can be stored as a BLOB
-        documentData:
-            blockData.type === "drawing_canvas"
-                ? blockData.documentData
-                    ? Buffer.from(blockData.documentData, 'base64')
-                    : null
-                : undefined,
-        //Flashcard link info
-        flashcardLinkId: blockData.flashcardLinkId
-            ? getUUIDBlob(blockData.flashcardLinkId)
-            : null,
-        blockId: getUUIDBlob(blockId),
-        parentBlockId: parentBlockId ? getUUIDBlob(parentBlockId) : null,
-        pageId: getUUIDBlob(pageMeta.pageId),
-        order: blockOrderMap[blockId] || 0,
-        type: blockData.type,
-    });
+    return {
+        ...adaptJsObjectToSql(structuredClone(blockData), {dropInvalidUUIDs: true}),
+        ...convertToSQLParams({
+            //Conversion for documentData field in DrawingCanvasBlocks so it can be stored as a BLOB
+            documentData:
+                blockData.type === "drawing_canvas"
+                    ? blockData.documentData
+                        ? Buffer.from(blockData.documentData, "base64")
+                        : null
+                    : undefined,
+            blockId: getUUIDBlob(blockId),
+            parentBlockId: parentBlockId ? getUUIDBlob(parentBlockId) : null,
+            pageId: getUUIDBlob(pageMeta.pageId),
+            order: blockOrderMap[blockId] || 0,
+            type: blockData.type,
+        }),
+    };
 }
 
 async function getExistingFlashcardLinkIdMapOfPage(db, pageId) {
@@ -245,18 +259,28 @@ async function performDatabaseWrite(
 
         const parentBlockId = blockParentIdMap[blockId] || null;
 
-        const inputParams = getParametersOfBlockForWrite(
-            blockData,
-            blockId,
-            parentBlockId,
-            pageMeta,
-            blockOrderMap,
-        );
+        let inputParams;
+        try {
+            inputParams = getParametersOfBlockForWrite(
+                blockData,
+                blockId,
+                parentBlockId,
+                pageMeta,
+                blockOrderMap,
+            );
 
-        await db.runMultiple(
-            db.getQueryOrThrow("page.insert_block"),
-            inputParams,
-        );
+            await db.runMultiple(
+                db.getQueryOrThrow("page.insert_block"),
+                inputParams,
+            );
+        } catch (e) {
+            //Log the parameters for additional debugging if a fail occured here
+            logDb(
+                "Failed to write individual block, paremeters used:",
+                inputParams, "produced from", blockData, blockId, parentBlockId
+            );
+            throw e;
+        }
     }
 }
 

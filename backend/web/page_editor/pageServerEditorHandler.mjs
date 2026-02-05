@@ -5,6 +5,15 @@ import {
     VALID_RECENT_LAST_EDITED_TIMESTAMP,
 } from "../foundation_safe/validations.js";
 import { ACTIVE_NOTEBOOK_STRUCTURE_MANAGER } from "../structure_editor/notebookStructureEditorSocket.mjs";
+import {
+    NewBlockOperation,
+    EditBlockOperation,
+    DeleteBlockOperation,
+    StructureChangeOperation,
+    serializeOperation,
+    deserializeOperation,
+} from "../foundation_safe/page/pageOperations.js";
+import { RequestError } from "../foundation_safe/requestError.js";
 
 export function handleRequest(activePage, ws, msg) {
     if (msg.type === "block_change") {
@@ -17,18 +26,14 @@ export function handleRequest(activePage, ws, msg) {
         }).throwErrorIfInvalid();
 
         //Update the active page data
-        // activePage.content[blockId] = {
-        //     ...existingBlock, //Apply existing data
-        //     ...content, //And then new data on top
-        // };
-        activePage.content[blockId] = content;
+        activePage.performOperation(new EditBlockOperation(blockId, content));
         activePage.isDirty = true;
         activePage.sendToOtherClientsWithHash(ws, msg);
     } else if (msg.type === "structure_change") {
         const { structure } = msg;
         ALL_FIELDS_PRESENT.test({ structure }).throwErrorIfInvalid();
 
-        activePage.structure = structure;
+        activePage.performOperation(new StructureChangeOperation(structure));
         activePage.isDirty = true;
         activePage.sendToOtherClientsWithHash(ws, msg);
     } else if (msg.type === "block_deletion") {
@@ -38,7 +43,7 @@ export function handleRequest(activePage, ws, msg) {
             blockId,
             existingBlock,
         }).throwErrorIfInvalid();
-        activePage.deleteBlock(blockId);
+        activePage.performOperation(new DeleteBlockOperation(blockId));
         activePage.isDirty = true;
         activePage.sendToOtherClientsWithHash(ws, msg);
     } else if (msg.type === "block_addition") {
@@ -48,8 +53,14 @@ export function handleRequest(activePage, ws, msg) {
             newBlockId,
             content,
         }).throwErrorIfInvalid();
-        activePage.content[newBlockId] = content;
-        activePage.insertBlock(adjacentBlockId, newBlockId, direction);
+        activePage.performOperation(
+            new NewBlockOperation(
+                adjacentBlockId,
+                newBlockId,
+                content,
+                direction,
+            ),
+        );
         activePage.isDirty = true;
         activePage.sendToOtherClientsWithHash(ws, msg);
     } else if (msg.type === "needs_sync") {
@@ -74,7 +85,9 @@ export function handleRequest(activePage, ws, msg) {
         for (const prop of safeProperties) {
             if (metadata[prop] !== undefined) {
                 if (propertyValidators[prop]) {
-                    let validation = propertyValidators[prop].test(metadata[prop]);
+                    let validation = propertyValidators[prop].test(
+                        metadata[prop],
+                    );
                     validation.throwRequestErrorIfInvalid();
                 }
 
@@ -100,6 +113,34 @@ export function handleRequest(activePage, ws, msg) {
                 },
             );
         }
+    } else if (msg.type === "history_action") {
+        const { action } = msg;
+        ALL_FIELDS_PRESENT.test({ action }).throwErrorIfInvalid();
+        let operation = null;
+        if (action === "undo") {
+            operation = activePage.undoLastOperation();
+            if (!operation) return;
+        } else if (action === "redo") {
+            operation = activePage.redoLastOperation();
+            if (!operation) return;
+        } else {
+            throw new RequestError("Invalid history action: " + action);
+        }
+
+        activePage.isDirty = true;
+        activePage.sendToAllClientsWithHash({
+            type: "history_action",
+            action,
+            operationData: serializeOperation(operation),
+        });
+    } else if (msg.type === "operation") {
+        const { operationData } = msg;
+        ALL_FIELDS_PRESENT.test({ operationData }).throwErrorIfInvalid();
+        const operation = deserializeOperation(operationData);
+        
+        activePage.performOperation(operation);
+        activePage.isDirty = true;
+        activePage.sendToOtherClientsWithHash(ws, msg);
     } else {
         logEditor("Unknown page server editor message type:", msg.type);
     }

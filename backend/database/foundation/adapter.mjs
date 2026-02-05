@@ -42,18 +42,23 @@ function jsToSqlName(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function adaptJsObjectToSql(obj, uuidBlobifyKeys = []) {
+export function adaptJsObjectToSql(obj, {uuidBlobifyKeys = [], dropInvalidUUIDs = false}) {
     const sqlObj = {};
     for (const key in obj) {
         const value = obj[key];
-        delete obj[key];
 
         if (value == null) continue; //Skip null values
 
         const sqlKey = "$" + jsToSqlName(key); //Since this adapting into SQL queries (not strictly rows), we need the $ prefix
 
         if (key.endsWith("Id") || (uuidBlobifyKeys.length !== 0 && uuidBlobifyKeys.includes(key))) {
-            sqlObj[sqlKey] = getUUIDBlob(value);
+            if (!dropInvalidUUIDs)
+                sqlObj[sqlKey] = getUUIDBlob(value);
+            else try {
+                sqlObj[sqlKey] = getUUIDBlob(value);
+            } catch (e) {
+                sqlObj[sqlKey] = null;
+            }
         } else {
             sqlObj[sqlKey] = value;
         }

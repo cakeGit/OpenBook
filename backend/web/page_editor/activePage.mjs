@@ -1,6 +1,8 @@
 import xxhash from "xxhash-wasm";
 import { handleRequest } from "./pageServerEditorHandler.mjs";
 import { logEditor } from "../../logger.mjs";
+import { MutablePage } from "../foundation_safe/page/mutablePage.js";
+import ActiveSocketElement from "../foundation/network/ActiveSocketElement.mjs";
 
 //This method handles linking a websocket to the handling, as the actual message handler is a seperate module
 function bindEvents(activePage, ws) {
@@ -35,11 +37,21 @@ function bindEvents(activePage, ws) {
 
 const hash = await xxhash();
 
-export class ActivePage {
+//Pseudo-double inheritance helper, safe to use as active socket element is mostly an interface in this case
+function sideInhereit(BaseClass, derivedInstance, loggingName) {
+    const baseInstance = new BaseClass(loggingName);
+    Object.getOwnPropertyNames(BaseClass.prototype).forEach((name) => {
+        if (name !== "constructor") {
+            derivedInstance[name] = derivedInstance[name] || baseInstance[name].bind(derivedInstance);
+        }
+    });
+}
+
+export class ActivePage extends MutablePage {
     constructor(pageMetadata, pageStructure, pageBlocks) {
+        super(pageStructure, pageBlocks, true, logEditor);
+        sideInhereit(ActiveSocketElement, this, "ActivePage");
         this.metadata = pageMetadata;
-        this.structure = pageStructure;
-        this.content = pageBlocks;
         this.connectedClients = [];
         this.isDirty = false;
     }
@@ -51,64 +63,6 @@ export class ActivePage {
 
     disconnectClient(ws) {
         this.connectedClients = this.connectedClients.filter((clientWs) => clientWs !== ws);
-    }
-
-    deleteBlock(blockId) {
-        delete this.content[blockId];
-        function walkAndDelete(node, blockId) {
-            if (!node.children) return;
-
-            const index = node.children.findIndex(
-                (child) => child.blockId === blockId
-            );
-            
-            if (index !== -1) {
-                node.children.splice(index, 1);
-                return;
-            }
-            
-            for (const child of node.children) {
-                if (walkAndDelete(child, blockId)) {
-                    return;
-                }
-            }
-            return;
-        }
-
-        walkAndDelete(this.structure, blockId);
-    }
-
-    insertBlock(adjacentBlockId, newBlockId, direction = "after") {
-        if (!adjacentBlockId) {
-            //Insert at start
-            this.structure.children.unshift({ blockId: newBlockId });
-            return;
-        }
-
-        this.findAndPerform(adjacentBlockId, (children, index) => {
-            if (direction === "after") {
-                children.splice(index + 1, 0, { blockId: newBlockId });
-            } else if (direction === "inside") {
-                if (!children[index].children) {
-                    children[index].children = [];
-                }
-                children[index].children.push({ blockId: newBlockId });
-            }
-        });
-    }
-
-    findAndPerform(targetBlockId, performer, currentNode = this.structure) {
-        if (!currentNode.children) {
-            return;
-        }
-        for (let i = 0; i < currentNode.children.length; i++) {
-            const child = currentNode.children[i];
-            if (child.blockId === targetBlockId) {
-                performer(currentNode.children, i);
-                return;
-            }
-            this.findAndPerform(targetBlockId, performer, child);
-        }
     }
 
     sendToOtherClients(senderWs, msg) {

@@ -3,7 +3,6 @@
     color: var(--color-on-accent);
     padding: 2px 4px;
     border-radius: 15px;
-    corner-shape: squircle;
     font-weight: bold;
 }
 

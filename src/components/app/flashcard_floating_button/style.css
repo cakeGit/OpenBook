@@ -34,7 +34,7 @@
 }
 
 .flashcard_symbol_2 {
-    border: 3px solid var(--color-heavy-border);
+    border: 3px solid var(--color-light-text);
     background-color: var(--color-pure-background);
     transform: translate(-40%, -50%) rotate(20deg);
     transition: transform 0.2s ease;

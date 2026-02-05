@@ -20,4 +20,9 @@ export const BLOCK_REGISTRY = {
         description: "A block for drawing diagrams or writing on a canvas.",
         type: "drawing_canvas",
     },
+    image: {
+        name: "Image",
+        description: "A block for displaying an image.",
+        type: "image",
+    }
 };

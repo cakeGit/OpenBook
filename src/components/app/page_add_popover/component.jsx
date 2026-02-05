@@ -93,7 +93,7 @@ export function PageAddBlockPopover({ pageRef }) {
         pageRef.current.openAddBlockPopover = (adjacentBlockId, blockRef) => {
             const rect = blockRef.current.getBoundingClientRect();
             pageModalRef.current.style.top = `${
-                rect.bottom + window.scrollY
+                rect.bottom
             }px`;
             pageModalRef.current.style.left = `${rect.left + window.scrollX}px`;
 
@@ -107,7 +107,7 @@ export function PageAddBlockPopover({ pageRef }) {
 
     return (
         <div
-            style={{ display: "none", position: "absolute" }}
+            style={{ display: "none", position: "fixed" }}
             ref={pageModalRef}
         >
             <input

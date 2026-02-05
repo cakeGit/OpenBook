@@ -114,7 +114,7 @@ export function createDragHandler(blockId, pageRef, wrapperRef, highlightRef) {
 
             window.blockHighlightElement.className = "page_block_highlight";
             window.blockHighlightElement.style.display = "none"; // Initially hidden
-            window.blockHighlightElement.style.position = "absolute";
+            window.blockHighlightElement.style.position = "fixed";
 
             //The transitions seem to misbehave unless there is an explicit initial position
             window.blockHighlightElement.style.top = `0px`;

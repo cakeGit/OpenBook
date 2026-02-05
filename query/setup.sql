@@ -74,5 +74,16 @@ CREATE TABLE IF NOT EXISTS DrawingCanvasBlocks (
     DocumentData BLOB
 );
 
+CREATE TABLE IF NOT EXISTS ImageBlocks (
+    BlockID BLOB PRIMARY KEY,
+    ResourceID BLOB --The link via ImageResources to display
+);
+
+CREATE TABLE IF NOT EXISTS ImageResources (
+    ImageResourceID BLOB PRIMARY KEY,
+    OwnerUserID BLOB NOT NULL,
+    ImagePath TEXT NOT NULL
+);
+
 --Blocks are accessed by page id, and since page id is not a primary key, its slow otherwise
 CREATE INDEX IF NOT EXISTS index_blocks_by_pageid ON Blocks (PageID);

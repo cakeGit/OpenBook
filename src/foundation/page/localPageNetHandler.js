@@ -1,3 +1,4 @@
+import { serializeOperation } from "../../../backend/web/foundation_safe/page/pageOperations";
 import { handleLocalRequest } from "./pageLocalEditorHandler";
 
 //Remove the react data since we cant send that, and it causes JSON to fail
@@ -11,7 +12,7 @@ export function getCleanNetworkBlockData(blockData) {
     return result;
 }
 
-export class LocalActivePage {
+export class PageNetHandler {
     constructor(pageRef, ws) {
         this.pageRef = pageRef;
         this.ws = ws;
@@ -55,6 +56,22 @@ export class LocalActivePage {
                 }
             }
         };
+    }
+
+    sendOperation(operation) {
+        const message = {
+            type: "operation",
+            operationData: serializeOperation(operation),
+        };
+        this.ws.send(JSON.stringify(message));
+    }
+
+    sendHistoryRequest(action) {
+        const message = {
+            type: "history_action",
+            action: action,
+        };
+        this.ws.send(JSON.stringify(message));
     }
 
     sendMetadata(newMetadata) {

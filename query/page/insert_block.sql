@@ -17,3 +17,7 @@ WHERE $Type = 'flashcard';
 REPLACE INTO DrawingCanvasBlocks (BlockID, DocumentData)
 SELECT $BlockID, $DocumentData
 WHERE $Type = 'drawing_canvas';
+
+REPLACE INTO ImageBlocks (BlockID, ResourceID)
+SELECT $BlockID, $ResourceID
+WHERE $Type = 'image';

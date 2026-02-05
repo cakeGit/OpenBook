@@ -6,6 +6,7 @@ import { useCanvasEditorHelper } from "../../foundation/useCanvasEditorHelper";
 import { MdDraw, MdTextFields } from "react-icons/md";
 import { CanvasDisplay } from "../../../flashcard/canvas_display/canvasDisplay.jsx";
 import Select from "react-select";
+import { IoMdCloseCircle } from "react-icons/io";
 
 function FlashcardSide({ side, data, pageRef, blockId }) {
     const textInputRef = useRef(null);
@@ -33,7 +34,8 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
         isCanvas && editModalOpen, //Added an additional optional argument to only enable edit handling when this is a canvas block
     );
 
-    async function handleTextChanged(e) { //Internal function for handling text changes
+    async function handleTextChanged(e) {
+        //Internal function for handling text changes
         //This logic is generally quite common between other text editable blocks
         //It may be better to take this out into a more common module at a later date
         if (textInputRef.current) {
@@ -49,7 +51,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
                 textInputRef.current.classList.remove("showplaceholder");
             }
         }
-    };
+    }
 
     //Update the placeholder visibility when data changes from the server
     useEffect(() => {
@@ -63,7 +65,8 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
         }
     }, [data[textDataKey]]);
 
-    async function enforceFlashcardStyle(e) {//Internal function for handling flashcard style changes
+    async function enforceFlashcardStyle(e) {
+        //Internal function for handling flashcard style changes
         const value = e.value;
         if (value === "canvas") {
             //"Switch" to canvas (define it as an empty canvas)
@@ -75,7 +78,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
             setIsCanvas(false);
         }
         pageRef.current.sendChange(blockId);
-    };
+    }
 
     //Options for the select dropdown to choose flashcard type
     const selectOptions = [
@@ -85,7 +88,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
 
     return (
         <div className={"flashcard_side flashcard_side_" + side}>
-            {isCanvas ? (//If this is a canvas flashcard, show the canvas display
+            {isCanvas ? ( //If this is a canvas flashcard, show the canvas display
                 <>
                     <div
                         className="flashcard_canvas"
@@ -109,7 +112,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
                                                   setEditModalOpen(false)
                                               }
                                           >
-                                              X
+                                              X Exit Drawing
                                           </button>
                                           <div className="flashcard_canvas_modal_canvas">
                                               {/*Tldraw whiteboard using the same setup as the diagramming block

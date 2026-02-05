@@ -1,7 +1,7 @@
 import { createRef } from "react";
 import { PageBlockWrapperComponent } from "../components/app/pageblock_wrapper/component.jsx";
 import { BLOCK_TYPE_REGISTRY } from "./page/typeRegistry.mjs";
-import { getCleanNetworkBlockData } from "./page/localActivePage.js";
+import { getCleanNetworkBlockData } from "./page/localPageNetHandler.js";
 
 export function renderBlock(blockId, data, children, pageRef, blockRef) {
     const Component = BLOCK_TYPE_REGISTRY[data.type]?.component;
@@ -31,6 +31,10 @@ export function renderChildBlocks(children, content, pageRef) {
     return (
         <div>
             {children.map((block) => {
+                if (!pageRef.current.content[block.blockId]) {
+                    pageRef.current.content[block.blockId] = {};
+                    console.warn("Missing content for blockId:", block.blockId);
+                }
                 // Each block gets its own ref
                 const blockRef =
                     pageRef.current.content[block.blockId].ref ||

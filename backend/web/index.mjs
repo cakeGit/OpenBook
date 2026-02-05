@@ -7,6 +7,7 @@ import { addPageEditorRouterEndpoint } from './page_editor/pageEditorSocket.mjs'
 import expressWs from 'express-ws';
 import { addNotebookStructureEditorRouterEndpoint } from './structure_editor/notebookStructureEditorSocket.mjs';
 import { serverStartTime } from '../index.js';
+import { imageRoute } from './imageRoute.mjs';
 
 logWeb("Web index.js loaded, starting web server...");
 
@@ -20,10 +21,16 @@ app.use(express.json());
 //Add api routes
 app.use('/api/', apiRouter.expressRouter);
 
+//Add image serving route
+app.use("/image/", imageRoute());
+
 //These have to be defferred until after expressWs call
 addPageEditorRouterEndpoint(app);
 addNotebookStructureEditorRouterEndpoint(app);
 
+// ViteExpress.config({
+//     mode: "production"
+// });
 ViteExpress.listen(app, PORT, () => {
     logWebWithGoodNewsBlinker(`Server running on http://localhost:${PORT}, server setup in`, (performance.now() - serverStartTime) / 1000, `s`);
 });

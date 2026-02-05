@@ -1,0 +1,1 @@
+INSERT INTO ImageResources (ImageResourceID, OwnerUserID, ImagePath) VALUES (?, ?, ?);

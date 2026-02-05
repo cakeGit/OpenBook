@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Page } from "../../../foundation/page/page.js";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { LocalPage } from "../../../foundation/page/localPage.js";
 import "./style.css";
 import { renderChildBlocks } from "../../../foundation/blockRenderer.jsx";
-import { LocalActivePage } from "../../../foundation/page/localActivePage.js";
+import { PageNetHandler } from "../../../foundation/page/localPageNetHandler.js";
 import { EmptyPageHint } from "../page_empty_hint/component.jsx";
 import { PageAddBlockPopover } from "../page_add_popover/component.jsx";
 import { AppLineBreak } from "../line_break/component.jsx";
 import { VALID_PAGE_NAME } from "../../../../backend/web/foundation_safe/validations.js";
+import { createPortal } from "react-dom";
+import { UndoRedoFloatingButton } from "../undo_redo_floating_button/component.jsx";
 
 //Methods we use for the display and handling of editing the page name
 function trySubmitNameChange(
@@ -61,13 +63,13 @@ export function PageViewComponent({ pageId }) {
     const pageNameRef = useRef(null);
     const pageNameChangeRef = useRef(null);
 
-    const [_structureRenderTick, setStructureRenderTick] = useState(0);
+    const [renderTick, setRenderTick] = useState(0);
 
     useEffect(() => {
         //If there is no page, make one
         if (!pageRef.current) {
             //Create an empty page for now
-            pageRef.current = new Page({ children: [] }, {});
+            pageRef.current = new LocalPage({ children: [] }, {});
 
             window.pageRef = pageRef; // (Debug, makes the pageRef avaliable on the console)
 
@@ -82,7 +84,7 @@ export function PageViewComponent({ pageId }) {
 
         //Register the structure rerender trigger, adds one to the tick to force react to recreate the whole component
         pageRef.current.triggerStructureRerender = () => {
-            setStructureRenderTick((tick) => tick + 1);
+            setRenderTick((tick) => tick + 1);
         };
 
         return () => {
@@ -100,7 +102,7 @@ export function PageViewComponent({ pageId }) {
         );
 
         //Create the net handler
-        const pageNetHandler = new LocalActivePage(pageRef, ws);
+        const pageNetHandler = new PageNetHandler(pageRef, ws);
         pageNetHandler.updateMetadata = (metadata) => {
             if (pageNameRef.current) {
                 pageNameRef.current.textContent = metadata.name;
@@ -123,7 +125,11 @@ export function PageViewComponent({ pageId }) {
     }, [pageId]);
 
     return (
-        <>
+        <Fragment key={renderTick}>
+            {createPortal(
+                <UndoRedoFloatingButton pageRef={pageRef} />,
+                document.body,
+            )}
             <h1>
                 {/*The name of the page, and the input box that takes its place when we edit it*/}
                 <span
@@ -173,6 +179,6 @@ export function PageViewComponent({ pageId }) {
 
                 <PageAddBlockPopover pageRef={pageRef} />
             </div>
-        </>
+        </Fragment>
     );
 }

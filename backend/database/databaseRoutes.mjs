@@ -3,6 +3,7 @@ import authDatabaseRoutes from "./routes/authDatabaseRoutes.mjs";
 import userDatabaseRoutes from "./routes/userDatabaseRoutes.mjs";
 import pageDatabaseRoutes from "./routes/pageDatabaseRoutes.mjs";
 import flashcardDatabaseRoutes from "./routes/flashcardDatabaseRoutes.mjs";
+import imageDatabaseRoutes from "./routes/imageDatabaseRoutes.mjs";
 
 export function addAllDatabaseRoutes(addEndpoint) {
     userDatabaseRoutes(addEndpoint);
@@ -10,4 +11,5 @@ export function addAllDatabaseRoutes(addEndpoint) {
     notebookDatabaseRoutes(addEndpoint);
     pageDatabaseRoutes(addEndpoint);
     flashcardDatabaseRoutes(addEndpoint);
+    imageDatabaseRoutes(addEndpoint);
 }
