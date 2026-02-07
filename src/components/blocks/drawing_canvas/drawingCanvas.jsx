@@ -24,7 +24,7 @@ export function PageDrawingCanvasBlock({
                     maxPages: 1,
                 }}
                 onMount={setEditor}
-            />{" "}
+            />
         </div>
     );
 }

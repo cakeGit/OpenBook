@@ -22,7 +22,6 @@ export function mergeContentSafe(oldContent, newContent) {
     if (oldContent && (oldContent.ref || oldContent.setData)) {
         newContent.ref = oldContent.ref;
         newContent.setData = oldContent.setData;
-        console.log("Merged content safe:", newContent);
         newContent.setData(newContent); //Update setData with new content
     }
     return newContent;

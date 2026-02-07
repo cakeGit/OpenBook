@@ -94,6 +94,7 @@ export function PageViewComponent({ pageId }) {
     }, []);
 
     const primaryContainerRef = useRef(null);
+    const pageCurrentNameRef = useRef(null);
 
     useEffect(() => {
         //Connect to the websocket
@@ -104,6 +105,7 @@ export function PageViewComponent({ pageId }) {
         //Create the net handler
         const pageNetHandler = new PageNetHandler(pageRef, ws);
         pageNetHandler.updateMetadata = (metadata) => {
+            pageCurrentNameRef.current = metadata.name
             if (pageNameRef.current) {
                 pageNameRef.current.textContent = metadata.name;
                 pageNameChangeRef.current.value = metadata.name;
@@ -124,8 +126,11 @@ export function PageViewComponent({ pageId }) {
         };
     }, [pageId]);
 
+    //Temp: disabled key={renderTick}
+    //React is actually strong enough to just handle updates to structure itself,
+    // the full remount also causes incredible lag.
     return (
-        <Fragment key={renderTick}>
+        <Fragment>
             {createPortal(
                 <UndoRedoFloatingButton pageRef={pageRef} />,
                 document.body,
@@ -138,11 +143,12 @@ export function PageViewComponent({ pageId }) {
                     onClick={() =>
                         startPageNameChange(pageNameRef, pageNameChangeRef)
                     }
-                ></span>
+                >{pageCurrentNameRef.current}</span>
                 <input
                     ref={pageNameChangeRef}
                     type="text"
                     className="page_name_input"
+                    defaultValue={pageCurrentNameRef.current}
                     style={{ display: "none" }}
                     onBlur={() =>
                         trySubmitNameChange(
