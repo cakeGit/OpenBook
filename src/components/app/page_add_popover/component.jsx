@@ -96,6 +96,8 @@ export function PageAddBlockPopover({ pageRef }) {
     const adjacentBlockIdRef = useRef(null);
     const inputRef = useRef(null);
 
+    const closeWithoutAddRef = useRef(null);
+
     const [results, setResults] = useState(null);
 
     //When the user types in the input, we update the search results based on the search query
@@ -130,6 +132,9 @@ export function PageAddBlockPopover({ pageRef }) {
     //Close the popover, just hide it
     function onBlur(e) {
         pageModalRef.current.style.display = "none";
+        if (closeWithoutAddRef.current) {
+            closeWithoutAddRef.current();
+        }
     }
 
     //When the page is loaded we need to make the method used to open this popover available
@@ -138,7 +143,9 @@ export function PageAddBlockPopover({ pageRef }) {
 
         //Extend the page with an openAddBlockPopover method, since everything has access to it
         //This method can then be called by the pageblocks
-        pageRef.current.openAddBlockPopover = (adjacentBlockId, blockRef) => {
+        pageRef.current.openAddBlockPopover = (adjacentBlockId, blockRef, onCloseWithoutAdd) => {
+            closeWithoutAddRef.current = onCloseWithoutAdd;
+
             const rect = blockRef.current.getBoundingClientRect();
             //Position the popover based on the block's position
             pageModalRef.current.style.top = `${rect.bottom}px`;

@@ -44,7 +44,9 @@ export class MutablePage {
 
     applyFullSync(newStructure, newContent) {
         if (this.trackHistory) {
-            this.logger("Warning: Full sync is incompatible with history tracking!");
+            this.logger(
+                "Warning: Full sync is incompatible with history tracking!",
+            );
             this.historyStack = [];
         }
 
@@ -59,11 +61,19 @@ export class MutablePage {
             //We can combine edit operations of the same block, we set a maximum merge time of 1 second
             //Edit block operations now have a timestamp property for this purpose
             if (operation instanceof EditBlockOperation) {
-                if (this.historyStack[this.historyStack.length - 1] instanceof EditBlockOperation &&
-                    this.historyStack[this.historyStack.length - 1].blockId === operation.blockId &&
-                    (operation.timestamp - this.historyStack[this.historyStack.length - 1].timestamp) < 1000) {
+                if (
+                    this.historyStack[this.historyStack.length - 1] instanceof
+                        EditBlockOperation &&
+                    this.historyStack[this.historyStack.length - 1].blockId ===
+                        operation.blockId &&
+                    operation.timestamp -
+                        this.historyStack[this.historyStack.length - 1]
+                            .timestamp <
+                        1000
+                ) {
                     //Merge with last operation
-                    this.historyStack[this.historyStack.length - 1].newData = operation.newData;
+                    this.historyStack[this.historyStack.length - 1].newData =
+                        operation.newData;
                     return;
                 }
             }
@@ -247,7 +257,7 @@ export class MutablePage {
                     scrapeChildIdsRecursive(child);
                 }
             }
-        }
+        };
 
         this._findAndPerform(blockId, (children, index, parentBlockId) => {
             scrapeChildIdsRecursive(children[index]);
@@ -330,5 +340,17 @@ export class MutablePage {
     doesBlockHaveChildren(blockId) {
         const children = this.getStructureChildren(blockId);
         return children.length > 0;
+    }
+
+    getPreviousBlock(blockId) {
+        let previousBlockId = null;
+        this._findAndPerform(blockId, (children, index, parentBlockId) => {
+            if (index > 0) {
+                previousBlockId = children[index - 1].blockId;
+            } else {
+                previousBlockId = parentBlockId; //If there is no previous sibling, return the parent
+            }
+        });
+        return previousBlockId ? this.content[previousBlockId] : null;
     }
 }

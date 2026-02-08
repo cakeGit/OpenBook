@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { AppLineBreak } from "../../components/app/line_break/component.jsx";
 import { PageCenterContent } from "../../components/layout/pageCenterContent/component.jsx";
 import "./style.css";
@@ -47,11 +48,11 @@ function BuildPage() {
                 </div>
             </div>
             <br />
-            <a href={`/flashcard_session?notebook_id=${notebookId}`}>Do the session again</a>
+            <Link to={`/flashcard_session?notebook_id=${notebookId}`}>Do the session again</Link>
             <br />
-            <a href={`/flashcard_select?notebook_id=${notebookId}`}>Setup a new session</a>
+            <Link to={`/flashcard_select?notebook_id=${notebookId}`}>Setup a new session</Link>
             <br />
-            <a href="/">Return to your notes</a>
+            <Link to="/">Return to your notes</Link>
         </PageCenterContent>
     );
 }

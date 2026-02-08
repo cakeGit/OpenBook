@@ -147,4 +147,18 @@ export default function notebookDatabaseRoutes(addEndpoint) {
             });
         },
     );
+
+    addEndpoint(
+        "notebook/get_user_notebooks",
+        async (db, message, response) => {
+            const notebooks = await db.all(
+                db.getQueryOrThrow("notebook.get_user_notebooks"),
+                [getUUIDBlob(message.userId)],
+            );
+
+            adaptSqlRowsContentToJs(notebooks);
+
+            return notebooks;
+        },
+    );
 }

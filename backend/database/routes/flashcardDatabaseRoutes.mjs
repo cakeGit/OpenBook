@@ -32,9 +32,10 @@ export default function flashcardDatabaseRoutes(addEndpoint) {
                 pageId,
                 userId
             }).throwErrorIfInvalid();
+            const getContent = {pageId, userId};
             const flashcards = await db.all(
                 db.getQueryOrThrow("flashcards.get_flashcards_information_of_page"),
-                adaptJsObjectToSql({pageId, userId}),
+                adaptJsObjectToSql(getContent),
             );
             adaptSqlRowsContentToJs(flashcards);
             return flashcards;

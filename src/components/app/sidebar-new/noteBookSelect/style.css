@@ -8,6 +8,49 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 10px 0;
+    margin-top: 10px;
     background-color: var(--color-secondary-background);
+    z-index: 3005;
+    position: relative;
+}
+
+.app_sidebar_notebook_select_options_container {
+    height: 0;
+    width: auto;
+    overflow: visible;
+    margin-bottom: 10px;
+}
+
+.app_sidebar_notebook_select_options {
+    position: relative;
+    top: -20px;
+    padding: 2px;
+    padding-top: 22px;
+    z-index: 3000;
+    background-color: var(--color-secondary-background);
+    border: 3px solid var(--color-soft-border);
+    border-radius: 20px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.app_sidebar_notebook_select_options p {
+    margin: 0;
+}
+
+
+.app_sidebar_notebook_select_options div {
+    cursor: pointer;
+    border: 2px solid var(--color-soft-border);
+    padding: 5px 10px;
+    border-radius: 18px;
+}
+
+.app_sidebar_notebook_select_options div:hover {
+    border: 2px solid var(--color-accent);
 }

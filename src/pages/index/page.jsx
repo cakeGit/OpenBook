@@ -7,8 +7,10 @@ import { withAuthCheck } from "../../foundation/authApi.js";
 import { fetchApi } from "../../foundation/api.js";
 import { useState } from "react";
 import { FlashcardFloatingButton } from "../../components/app/flashcard_floating_button/component.jsx";
+import { useLocation } from "react-router-dom";
 
 function BuildPage() {
+    const { search } = useLocation();
     withAuthCheck();
 
     let [user, setUser] = useState(null);
@@ -47,8 +49,13 @@ function BuildPage() {
                 setNotebookName(data.name);
             })
             .catch((error) => {
-                console.error(`No access to notebook '${currentNotebookId}':`, error);
-                window.location.href = currentPageId ? "/?page_id=" + currentPageId : "/";
+                console.error(
+                    `No access to notebook '${currentNotebookId}':`,
+                    error,
+                );
+                window.location.href = currentPageId
+                    ? "/?page_id=" + currentPageId
+                    : "/";
             });
     }
 
@@ -70,7 +77,7 @@ function BuildPage() {
     }
 
     return (
-        <div>
+        <div key={search}>
             <FlashcardFloatingButton currentNotebookId={currentNotebookId} />
             <AppSideBar
                 currentNotebookName={notebookName}
@@ -78,9 +85,7 @@ function BuildPage() {
             />
             <PageCenterContent>
                 {currentPageId ? (
-                    <PageViewComponent
-                        pageId={currentPageId}
-                    />
+                    <PageViewComponent pageId={currentPageId} />
                 ) : (
                     <div>Loading page...</div>
                 )}

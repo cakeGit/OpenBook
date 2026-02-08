@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ALL_FIELDS_PRESENT } from "../../../../../backend/web/foundation_safe/validations.js";
 import { startDraggingPage } from "./pageDrag";
 import "./style.css";
+import { Link } from "react-router-dom";
 
 function NotebookHighlightTarget({ ref }) {
     return (
@@ -71,8 +72,8 @@ function NotebookStructureNode({
                         alignItems: "center",
                     }}
                 >
-                    <a
-                        href={`/?notebook_id=${notebookId}&page_id=${item.pageId}`}
+                    <Link
+                        to={`/?notebook_id=${notebookId}&page_id=${item.pageId}`}
                         className="notebook_structure_page_name"
                         style={{
                             fontWeight:
@@ -84,7 +85,7 @@ function NotebookStructureNode({
                         }}
                     >
                         {item.name || "(untitled)"}
-                    </a>
+                    </Link>
 
                     <button
                         style={{ display: "block" }}

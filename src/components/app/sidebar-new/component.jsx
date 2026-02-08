@@ -49,7 +49,7 @@ export function AppSideBar({
                     <br />
                 </p>
                 <AppSidebarLineBreak />
-                <AppSidebarNoteBookSelect currentName={currentNotebookName} />
+                <AppSidebarNoteBookSelect currentName={currentNotebookName} currentNotebookId={currentNotebookId} />
                 <NotebookStructureView notebookId={currentNotebookId} setSidebarLock={setSidebarLock} />
                 <AppSidebarLineBreak />
 

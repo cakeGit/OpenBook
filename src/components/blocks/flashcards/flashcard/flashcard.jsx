@@ -6,7 +6,6 @@ import { useCanvasEditorHelper } from "../../foundation/useCanvasEditorHelper";
 import { MdDraw, MdTextFields } from "react-icons/md";
 import { CanvasDisplay } from "../../../flashcard/canvas_display/canvasDisplay.jsx";
 import Select from "react-select";
-import { IoMdCloseCircle } from "react-icons/io";
 
 function FlashcardSide({ side, data, pageRef, blockId }) {
     const textInputRef = useRef(null);

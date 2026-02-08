@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import "./style.css";
 
 export function FlashcardFloatingButton({ currentNotebookId }) {
+    const navigate = useNavigate();
     const handleClick = () => {
-        window.location.href = `/flashcard_select?notebook_id=${currentNotebookId}`;
+        navigate(`/flashcard_select?notebook_id=${currentNotebookId}`);
     };
     return (
         <div className="flashcard_floating_button" onClick={handleClick}>
