@@ -4,6 +4,7 @@ import { AppSidebarLineBreak } from "./lineBreak/component.jsx";
 import { AppSidebarNoteBookSelect } from "./noteBookSelect/component.jsx";
 import { NotebookStructureView } from "./notebook_Structure/component.jsx";
 import { CurrentLoginUserInfo } from "./current_login_user_info/component.jsx";
+import { Link } from "react-router-dom";
 
 export function AppSideBar({
     currentNotebookName,
@@ -36,18 +37,9 @@ export function AppSideBar({
                     <b>open</b>book 📖
                 </div>
                 <AppSidebarLineBreak />
-                <p>
-                    Example list of app directory
-                    <br />
-                    Settings
-                    <br />
-                    Sign in/out
-                    <br />
-                    Account
-                    <br />
-                    These are all subject to change
-                    <br />
-                </p>
+                <div className="app_sidebar_navigation">
+                    <Link to="/settings">Settings</Link>
+                </div>
                 <AppSidebarLineBreak />
                 <AppSidebarNoteBookSelect currentName={currentNotebookName} currentNotebookId={currentNotebookId} />
                 <NotebookStructureView notebookId={currentNotebookId} setSidebarLock={setSidebarLock} />

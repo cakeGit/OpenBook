@@ -1,6 +1,10 @@
 import { getWelcomePage } from "../page/welcomePage.mjs";
 import { writePageToDatabase } from "../page/serializer.mjs";
-import { getUUIDBlob, parseUUIDBlob } from "../uuidBlober.mjs";
+import {
+    generateRandomUUIDBlob,
+    getUUIDBlob,
+    parseUUIDBlob,
+} from "../uuidBlober.mjs";
 import { RequestError } from "../../web/foundation_safe/requestError.js";
 import { logDb } from "../../logger.mjs";
 import { adaptSqlRowsContentToJs } from "../foundation/adapter.mjs";
@@ -52,12 +56,6 @@ export default function notebookDatabaseRoutes(addEndpoint) {
     });
 
     addEndpoint("get_default_page", async (db, message, response) => {
-        //Check the player has access to the notebook
-        await db.get(
-            db.getQueryOrThrow("notebook.get_accessible_notebook_name"),
-            [getUUIDBlob(message.notebookId), getUUIDBlob(message.userId)],
-        );
-
         let result = await db.get(
             db.getQueryOrThrow("notebook.get_default_page"),
             [getUUIDBlob(message.notebookId)],
@@ -161,4 +159,65 @@ export default function notebookDatabaseRoutes(addEndpoint) {
             return notebooks;
         },
     );
+
+    //The user id requirement here ensures only the owner can delete the notebook
+    addEndpoint("notebook/delete_notebook", async (db, message, response) => {
+        //Cannot hard-require notebook ownership here since the page deletion query needs to run regardless.
+        //SO, just to double check, the notebook owner specific query is done. Owner access should already be checked.
+        const name = await db.get(
+            db.getQueryOrThrow("notebook.get_owner_accessible_notebook_name"),
+            [getUUIDBlob(message.notebookId), getUUIDBlob(message.userId)],
+        );
+        logDb(
+            "User",
+            message.userId,
+            "is attempting to delete notebook",
+            message.notebookId,
+        );
+        if (!name) {
+            throw new RequestError(
+                "User does not have permission to delete this notebook, or it does not exist.",
+            );
+        }
+
+        await db.runMultiple(db.getQueryOrThrow("notebook.delete_notebook"), {
+            $NotebookId: getUUIDBlob(message.notebookId),
+        });
+        logDb(
+            "User",
+            message.userId,
+            "successfully deleted notebook",
+            message.notebookId,
+        );
+    });
+
+    //The user id requirement here ensures only the owner can rename the notebook
+    addEndpoint("notebook/rename_notebook", async (db, message, response) => {
+        await db.run(db.getQueryOrThrow("notebook.rename_notebook"), [
+            message.newName,
+            getUUIDBlob(message.notebookId),
+            getUUIDBlob(message.userId),
+        ]);
+    });
+
+    addEndpoint("notebook/create_notebook", async (db, message, response) => {
+        const existingNotebooks = await db.all(
+            db.getQueryOrThrow("notebook.get_user_notebooks"),
+            [getUUIDBlob(message.userId)],
+        );
+        const newNotebookName = `Notebook #${existingNotebooks.length + 1}`;
+
+        logDb(
+            "User",
+            message.userId,
+            "is creating a new notebook with name",
+            newNotebookName,
+        );
+
+        await db.run(db.getQueryOrThrow("notebook.create_notebook"), [
+            generateRandomUUIDBlob(),
+            newNotebookName,
+            getUUIDBlob(message.userId),
+        ]);
+    });
 }

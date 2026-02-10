@@ -1,0 +1,1 @@
+UPDATE Notebooks SET Name = ? WHERE NotebookID = ? AND OwnerUserID = ?;

@@ -47,3 +47,26 @@
     left: -240px;
     transition: left 0.3s ease-in-out;
 }
+
+.app_sidebar_navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin: 5px 0;
+}
+
+.app_sidebar_navigation a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 4px;
+    display: block;
+    border: 2px solid transparent;
+}
+
+.app_sidebar_navigation a:hover {
+    text-decoration: underline;
+    border: 2px solid var(--color-border);
+}

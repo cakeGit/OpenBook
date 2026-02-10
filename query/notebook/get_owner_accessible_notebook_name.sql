@@ -1,0 +1,1 @@
+SELECT Name FROM Notebooks WHERE NotebookID = ? AND OwnerUserID = ?;

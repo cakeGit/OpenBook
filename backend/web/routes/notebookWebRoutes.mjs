@@ -1,5 +1,5 @@
 import { getOrThrowAuthorizedUserUUIDOfRequest } from "../foundation/webAuth.mjs";
-import { ALL_FIELDS_PRESENT } from "../foundation_safe/validations.js";
+import { ALL_FIELDS_PRESENT, VALID_NOTEBOOK_NAME } from "../foundation_safe/validations.js";
 import { dbInterface } from "../webDbInterface.mjs";
 
 export default function notebookWebRoutes(apiRouter) {
@@ -15,6 +15,13 @@ export default function notebookWebRoutes(apiRouter) {
         let userId = await getOrThrowAuthorizedUserUUIDOfRequest(req);
         //Get the default page for a given notebook
         let notebookId = req.body?.notebook_id;
+
+        //Check the user has access to the notebook
+        await dbInterface.sendRequest("notebook/get_accessible_notebook_name", {
+            notebookId,
+            userId,
+        });
+
         ALL_FIELDS_PRESENT.test({ notebookId }).throwRequestErrorIfInvalid();
 
         return await dbInterface.sendRequest("get_default_page", {
@@ -41,5 +48,57 @@ export default function notebookWebRoutes(apiRouter) {
                 { userId },
             ),
         };
+    });
+
+    apiRouter.for("/notebook/delete_notebook", async (req) => {
+        let userId = await getOrThrowAuthorizedUserUUIDOfRequest(req);
+        let notebookId = req.body?.notebookId;
+        
+        ALL_FIELDS_PRESENT.test({
+            notebookId,
+        }).throwRequestErrorIfInvalid();
+
+        //Check the user has access to the notebook
+        await dbInterface.sendRequest("notebook/get_accessible_notebook_name", {
+            notebookId,
+            userId,
+        });
+
+        return await dbInterface.sendRequest("notebook/delete_notebook", {
+            notebookId,
+            userId,
+        });
+    });
+
+    apiRouter.for("/notebook/rename_notebook", async (req) => {
+        let userId = await getOrThrowAuthorizedUserUUIDOfRequest(req);
+        let notebookId = req.body?.notebookId;
+        let newName = req.body?.newName;
+
+        ALL_FIELDS_PRESENT.test({
+            notebookId,
+            newName,
+        }).throwRequestErrorIfInvalid();
+
+        //Check the user has access to the notebook
+        await dbInterface.sendRequest("notebook/get_accessible_notebook_name", {
+            notebookId,
+            userId,
+        });
+
+        VALID_NOTEBOOK_NAME.test(newName).throwRequestErrorIfInvalid();
+        
+        return await dbInterface.sendRequest("notebook/rename_notebook", {
+            notebookId,
+            userId,
+            newName,
+        });
+    });
+
+    apiRouter.for("/notebook/create_notebook", async (req) => {
+        let userId = await getOrThrowAuthorizedUserUUIDOfRequest(req);
+        return await dbInterface.sendRequest("notebook/create_notebook", {
+            userId,
+        });
     });
 }

@@ -137,7 +137,7 @@ export default function userDatabaseRoutes(addEndpoint) {
             profile_picture_url: userInfo.ProfilePictureURL,
         };
     });
-
+    
     addEndpoint("check_user_exists", async (db, message, response) => {
         let row = await db.get(db.getQueryOrThrow("check_user_exists"), [
             getUUIDBlob(message.userId),
