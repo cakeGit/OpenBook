@@ -1,6 +1,6 @@
+import { adaptJsObjectToSql } from "../foundation/adapter.mjs";
 import { readPageFromDatabase } from "../page/deserializer.mjs";
 import { writePageToDatabase } from "../page/serializer.mjs";
-import { getUUIDBlob } from "../uuidBlober.mjs";
 
 export default function pageDatabaseRoutes(addEndpoint) {
     addEndpoint("get_page_data", async (db, message, response) => {
@@ -10,17 +10,22 @@ export default function pageDatabaseRoutes(addEndpoint) {
     });
 
     addEndpoint("write_page_data", async (db, message, response) => {
-        await writePageToDatabase(db, message.metadata, message.structure, message.content);
+        await writePageToDatabase(
+            db,
+            message.metadata,
+            message.structure,
+            message.content,
+        );
         return { success: true };
-    })
+    });
 
     addEndpoint("check_page_access", async (db, message, response) => {
-        const pageIdBlob = getUUIDBlob(message.pageId);
-        const userIdBlob = getUUIDBlob(message.userId);
-
         const pageWithAccess = await db.get(
             db.getQueryOrThrow("page.check_page_access"),
-            [pageIdBlob, userIdBlob]
+            adaptJsObjectToSql({
+                pageId: message.pageId,
+                userId: message.userId,
+            }),
         );
 
         return {

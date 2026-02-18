@@ -1,0 +1,1 @@
+SELECT * FROM NotebookShares, Notebooks, Users WHERE NotebookShares.NotebookID = Notebooks.NotebookID AND Notebooks.OwnerUserID = ? AND NotebookShares.SharedWithUserID = Users.UserID;

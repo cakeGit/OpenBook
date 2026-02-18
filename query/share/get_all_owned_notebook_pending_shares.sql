@@ -1,0 +1,1 @@
+SELECT * FROM NotebookInvites, Notebooks, Users WHERE NotebookInvites.NotebookID = Notebooks.NotebookID AND Notebooks.OwnerUserID = ? AND NotebookInvites.InvitedUserID = Users.UserID;

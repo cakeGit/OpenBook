@@ -88,17 +88,32 @@ export default function userDatabaseRoutes(addEndpoint) {
         ALL_FIELDS_PRESENT.test(userData).throwErrorIfInvalid();
 
         const tagName = getTagName(userData.displayName);
+
+        let uniqueTagName = tagName;
+        let tagSuffix = 1;
+        while (true) {
+            let existingUser = await db.get(
+                db.getQueryOrThrow("user.get_user_by_tag_name"),
+                [uniqueTagName],
+            );
+            if (!existingUser) {
+                break;
+            }
+            uniqueTagName = `${tagName}${tagSuffix}`;
+            tagSuffix++;
+        }
+
         const userUUID = generateRandomUUID();
         const userUUIDBlob = getUUIDBlob(userUUID);
 
         logDb(
-            `Creating new user account ${userData.displayName} (${userUUID}): ${tagName}~${userData.email}`,
+            `Creating new user account ${userData.displayName} (${userUUID}): ${uniqueTagName}~${userData.email}`,
         );
 
         await db.run(db.getQueryOrThrow("create_user"), [
             userUUIDBlob,
             userData.googleUserId,
-            tagName,
+            uniqueTagName,
             userData.displayName,
             userData.email,
             userData.profilePictureUrl,

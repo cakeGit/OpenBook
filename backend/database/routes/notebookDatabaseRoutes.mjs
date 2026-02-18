@@ -7,7 +7,10 @@ import {
 } from "../uuidBlober.mjs";
 import { RequestError } from "../../web/foundation_safe/requestError.js";
 import { logDb } from "../../logger.mjs";
-import { adaptSqlRowsContentToJs } from "../foundation/adapter.mjs";
+import {
+    adaptJsObjectToSql,
+    adaptSqlRowsContentToJs,
+} from "../foundation/adapter.mjs";
 import { ALL_FIELDS_PRESENT } from "../../web/foundation_safe/validations.js";
 
 const notebookWelcomePageInsertionsByUser = {};
@@ -88,7 +91,10 @@ export default function notebookDatabaseRoutes(addEndpoint) {
         async (db, message, response) => {
             let result = await db.get(
                 db.getQueryOrThrow("notebook.get_accessible_notebook_name"),
-                [getUUIDBlob(message.notebookId), getUUIDBlob(message.userId)],
+                adaptJsObjectToSql({
+                    notebookId: message.notebookId,
+                    userId: message.userId,
+                }),
             );
             if (!result) {
                 throw new RequestError(
@@ -151,7 +157,9 @@ export default function notebookDatabaseRoutes(addEndpoint) {
         async (db, message, response) => {
             const notebooks = await db.all(
                 db.getQueryOrThrow("notebook.get_user_notebooks"),
-                [getUUIDBlob(message.userId)],
+                adaptJsObjectToSql({
+                    userId: message.userId,
+                }),
             );
 
             adaptSqlRowsContentToJs(notebooks);

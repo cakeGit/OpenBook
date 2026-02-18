@@ -1,0 +1,1 @@
+DELETE FROM NotebookInvites WHERE NotebookID = $NotebookID AND InvitedUserId = $UserID;

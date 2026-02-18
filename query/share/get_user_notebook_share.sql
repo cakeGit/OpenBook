@@ -1,0 +1,1 @@
+SELECT * FROM NotebookShares WHERE NotebookID = ? AND SharedWithUserID = ?;

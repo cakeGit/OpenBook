@@ -1,7 +1,7 @@
 -- Users
 CREATE TABLE IF NOT EXISTS Users (
     UserID BLOB PRIMARY KEY,
-    LabelName TEXT NOT NULL, --Little "tag" name. e.g "Samuel" -> "samuel"
+    LabelName TEXT NOT NULL UNIQUE, --Little unique "tag" name. e.g "Samuel" -> "@samuel235"
     DisplayName TEXT NOT NULL,
     Email TEXT NOT NULL,
     GoogleUserID TEXT, --May be NULL if the user deleted their account
@@ -83,6 +83,19 @@ CREATE TABLE IF NOT EXISTS ImageResources (
     ImageResourceID BLOB PRIMARY KEY,
     OwnerUserID BLOB NOT NULL,
     ImagePath TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS NotebookShares (
+    NotebookID BLOB NOT NULL,
+    SharedWithUserID BLOB NOT NULL,
+    PRIMARY KEY (NotebookID, SharedWithUserID) --Composite key
+);
+
+CREATE TABLE IF NOT EXISTS NotebookInvites (
+    NotebookID BLOB NOT NULL,
+    InvitedUserID BLOB NOT NULL,
+    SentDate INTEGER NOT NULL,
+    PRIMARY KEY (NotebookID, InvitedUserID) --Composite key
 );
 
 --Blocks are accessed by page id, and since page id is not a primary key, its slow otherwise

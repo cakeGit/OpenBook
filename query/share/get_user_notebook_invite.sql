@@ -1,0 +1,1 @@
+SELECT * FROM NotebookInvites WHERE NotebookID = ? AND InvitedUserId = ?;

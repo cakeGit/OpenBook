@@ -1,0 +1,1 @@
+REPLACE INTO NotebookInvites (NotebookID, InvitedUserID, SentDate) VALUES (?, ?, ?);
