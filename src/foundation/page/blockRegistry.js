@@ -15,6 +15,11 @@ export const BLOCK_REGISTRY = {
         description: "A block for holding your flashcards.",
         type: "flashcards",
     },
+    assignment_container: {
+        name: "Assignments",
+        description: "A block for organizing your todos and assignments.",
+        type: "assignment_container",
+    },
     drawingCanvas: {
         name: "Drawing Canvas",
         description: "A block for drawing diagrams or writing on a canvas.",

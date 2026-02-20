@@ -29,7 +29,7 @@ async function tryUploadImage(
             //Apply the new image resource as the source of this image in the page
             pageRef.current.content[blockId].resourceId =
                 result.imageResourceId;
-            pageRef.current.sendChange(blockId);
+            pageRef.current.onChange(blockId);
 
             //Update the image resource id we are rendering ourselves
             setCurrentImageResourceId(result.imageResourceId);
@@ -44,7 +44,7 @@ async function tryUploadImage(
         });
 }
 
-export function PageImageBlock({ blockId, data, pageRef, children, ref }) {
+export function PageImageBlock({ blockId, data, pageRef, children, blockRef }) {
     const imageUploadRef = useRef(null);
 
     const [currentImageResourceId, setCurrentImageResourceId] = useState(
@@ -60,7 +60,7 @@ export function PageImageBlock({ blockId, data, pageRef, children, ref }) {
     }, [data]);
 
     return (
-        <div ref={ref} className="page_image_block_container">
+        <div ref={blockRef} className="page_image_block_container">
             {currentImageResourceId ? ( //Display the image (if present)
                 <img
                     src={`/image/${currentImageResourceId}`}

@@ -99,3 +99,53 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.notebook_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 499;
+    backdrop-filter: blur(1px) brightness(0.95);
+}
+
+.notebook_modal_container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 500;
+    background-color: var(--color-pure-background);
+    border: 2px solid var(--color-soft-border);
+    border-radius: 5px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.generic_modal_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 499;
+    backdrop-filter: blur(1px) brightness(0.95);
+}
+
+.generic_modal_container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 500;
+    background-color: var(--color-pure-background);
+    border: 2px solid var(--color-soft-border);
+    border-radius: 5px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

@@ -37,9 +37,6 @@ export function adaptSqlContentToJs(con, opts) {
         ) {
             //For any ID field, parse the UUID blob
             con[camelKey] = parseUUIDBlob(value);
-        } else if (key.endsWith("Date")) {
-            //For any Date field, convert timestamp to Date object
-            con[camelKey] = new Date(value);
         } else {
             con[camelKey] = value;
         }
@@ -86,9 +83,6 @@ export function adaptJsObjectToSql(obj, opts) {
                 } catch (e) {
                     sqlObj[sqlKey] = null;
                 }
-        } else if (key.endsWith("Date") && value instanceof Date) {
-            //For anything ending in "date", get the integer timestamp to use rather than converting it manually
-            sqlObj[sqlKey] = value.getTime();
         } else {
             sqlObj[sqlKey] = value;
         }

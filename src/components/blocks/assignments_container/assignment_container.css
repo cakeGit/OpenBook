@@ -1,0 +1,20 @@
+.assignments_block_container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.assignment_add_button {
+    align-self: center;
+}
+
+.inner_inset_styled_container > div {
+    padding: 5px;
+    border-radius: 10px;
+    background-color: var(--color-secondary-background);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border: 2px solid var(--color-soft-border);
+    align-items: stretch;
+}

@@ -43,7 +43,7 @@ export function useCanvasEditorHelper(blockId, canvasDataKey, data, pageRef, act
 
             //Pack because we're storing a fairly large JSON 'dump'
             pageRef.current.content[blockId][canvasDataKey] = compressed;
-            pageRef.current.sendChange(blockId);
+            pageRef.current.onChange(blockId);
         }, 100);
 
         const cleanup = editor.store.listen(

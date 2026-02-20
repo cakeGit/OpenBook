@@ -26,6 +26,13 @@ WHERE BlockID IN (
     WHERE Blocks.PageID = $pageId
 );
 
+DELETE FROM AssignmentBlocks
+WHERE BlockID IN (
+    SELECT Blocks.BlockID
+    FROM Blocks
+    WHERE Blocks.PageID = $pageId
+);
+
 --Finally, after deleting from dependent tables, delete from Blocks table
 DELETE FROM Blocks
 WHERE BlockID IN (

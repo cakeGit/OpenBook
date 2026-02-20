@@ -43,7 +43,21 @@ export class LocalPage extends MutablePage {
         runnable();
     }
 
-    sendChange(blockId) {
+    checkForParentChildSortingUpdate(blockId) {
+        //Find the parent (if exists), to avoid using the protected (_) findAndPerform, mutable page has a new method
+        const parentBlockId = this.getParentBlockIdOfBlock(blockId);
+
+        //Get the type of the block changed, and look for if a childSorting
+        const blockType = BLOCK_TYPE_REGISTRY[this.content[parentBlockId]?.type];
+        const childSorting = blockType?.childSorting;
+        if (childSorting) {
+            //Can now just call triggerRerenderChildren (maintaining the same ?)
+            this.content[parentBlockId]?.triggerRerenderChildren();
+        }
+    }
+
+    onChange(blockId) {
+        this.checkForParentChildSortingUpdate(blockId);
         this.checkForNetAndRun(() =>
             this.linkedNetHandler.sendBlockChange(
                 blockId,

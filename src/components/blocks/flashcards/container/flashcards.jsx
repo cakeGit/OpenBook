@@ -4,7 +4,7 @@ import "./flashcards.css";
 import { FlexCenter } from "../../../app/flex_center/component.jsx";
 import { AppLineBreak } from "../../../app/line_break/component.jsx";
 
-export function PageFlashcardsBlock({ blockId, data, pageRef, children, ref }) {
+export function PageFlashcardsBlock({ blockId, data, pageRef, children, blockRef }) {
     const { subcontainerElement } = useTargetableSubcomponentContainer(
         pageRef,
         blockId,
@@ -19,7 +19,7 @@ export function PageFlashcardsBlock({ blockId, data, pageRef, children, ref }) {
     }
 
     return (
-        <div ref={ref} className="flashcards_block_container">
+        <div ref={blockRef} className="flashcards_block_container">
             <h2>
                 Flashcards&nbsp;
                 {/* Collapse/Expand button */}

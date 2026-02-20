@@ -7,7 +7,7 @@ export function cloneContentSafe(content) {
     //Get the content without the refs or setData functions
     const safeContent = {};
     for (const key in content) {
-        if (key == "ref" || key == "setData") {
+        if (key == "ref" || key == "setData" || key == "triggerRerenderChildren") {
             continue;
         }
         safeContent[key] = structuredClone(content[key]);
@@ -18,10 +18,13 @@ export function cloneContentSafe(content) {
 //Ensure that we preserve refs and setData functions when merging content, for the client
 // for the client, newContent is clean and just content data and oldContent has the refs/setData we need
 export function mergeContentSafe(oldContent, newContent) {
-    newContent = structuredClone(newContent); //Prevent modifying input object
-    if (oldContent && (oldContent.ref || oldContent.setData)) {
+    //Previous was just "structuredClone", but because newContent, in some cases, contains unsafe data like refs or setData,
+    //It requires the specialised clone function
+    newContent = cloneContentSafe(newContent);
+    if (oldContent && (oldContent.ref || oldContent.setData || oldContent.triggerRerenderChildren)) {
         newContent.ref = oldContent.ref;
         newContent.setData = oldContent.setData;
+        newContent.triggerRerenderChildren = oldContent.triggerRerenderChildren;
         newContent.setData(newContent); //Update setData with new content
     }
     return newContent;
@@ -106,6 +109,14 @@ export class MutablePage {
         }
         this.logger("No operation to redo");
         return null;
+    }
+
+    getParentBlockIdOfBlock(blockId) {
+        let parentBlockId = null;
+        this._findAndPerform(blockId, (children, index, currentParentBlockId) => {
+            parentBlockId = currentParentBlockId;
+        });
+        return parentBlockId;
     }
 
     //Get a copy of a block and its children from the structure and content

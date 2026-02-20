@@ -1,0 +1,138 @@
+.assignment_block {
+    border-radius: 10px;
+    border: 2px solid var(--color-soft-border);
+    background-color: var(--color-pure-background);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 5px;
+    gap: 5px;
+}
+
+.assignment_block > div {
+    position: relative;
+    width: max-content;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+.assignment_block > div:first-child {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+.assignment_description {
+    flex: 1;
+    position: relative;
+}
+
+.assignment_description_input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    resize: none;
+    overflow: hidden;
+
+    /*Test visualization*/
+    /* opacity: 0.5;
+    color: pink;
+    top: -3px;
+    left: -3px; */
+}
+
+.assignment_description_input:focus {
+    outline: none;
+    border: 2px solid var(--color-soft-accent);
+    border-radius: 5px;
+}
+
+.assignment_description_spanner {
+    width: fit-content;
+    /* color:blueviolet; */
+    opacity: 0;
+    pointer-events: none;
+    white-space: pre-wrap;
+    min-height: 1em;
+}
+
+.assignment_description_input, .assignment_description_spanner {
+    display: block;
+    border: 2px solid transparent;
+    background-color: transparent;
+    padding: 2px;
+    margin: 0px;
+    word-wrap: break-word;
+    font-size: medium;
+    font-family: inherit;
+}
+
+.assignment_description_input:focus {
+    border: 2px solid var(--color-soft-accent);
+}
+
+.vertical_spacer {
+    width: 1px;
+    height: 100%;
+    border: 4px solid transparent;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 1px;
+    background-color: var(--color-soft-border);
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.assignment_modal_content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 300px;
+    color: var(--color-pure-text);
+}
+
+.assignment_modal_content h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--color-pure-text);
+}
+
+.assignment_modal_body {
+    display: flex;
+    flex-direction: column;
+}
+
+.assignment_modal_input {
+    padding: 8px 12px;
+    border: 1px solid var(--color-soft-border);
+    border-radius: 4px;
+    background-color: var(--color-pure-background);
+    color: var(--color-pure-text);
+    font-size: 1rem;
+}
+
+.assignment_modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.assignment_modal_button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.due_date_past {
+    border-color: var(--color-error);
+}
+
+.due_date_complete {
+    border-color: var(--color-success);
+}

@@ -79,6 +79,14 @@ CREATE TABLE IF NOT EXISTS ImageBlocks (
     ResourceID BLOB --The link via ImageResources to display
 );
 
+CREATE TABLE IF NOT EXISTS AssignmentBlocks (
+    BlockID BLOB PRIMARY KEY,
+    DescriptionText TEXT,
+    LinkText TEXT,
+    DueDate INTEGER,
+    Completed INTEGER
+);
+
 CREATE TABLE IF NOT EXISTS ImageResources (
     ImageResourceID BLOB PRIMARY KEY,
     OwnerUserID BLOB NOT NULL,

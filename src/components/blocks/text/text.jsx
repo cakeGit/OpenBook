@@ -6,7 +6,7 @@ import { DeleteBlockOperation } from "../../../../backend/web/foundation_safe/pa
 
 let textRenderAutofocusId = null; //Used to make the next time a text block renders of this id to focus the box
 
-export function PageTextBlock({ blockId, data, pageRef, children, ref }) {
+export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
     const { subcontainerElement } = useTargetableSubcomponentContainer(
         pageRef,
         blockId,
@@ -23,7 +23,7 @@ export function PageTextBlock({ blockId, data, pageRef, children, ref }) {
             if (textInputRef.current) {
                 textInputRef.current.innerText = newTextContent;
                 pageRef.current.content[blockId].textContent = newTextContent;
-                pageRef.current.sendChange(blockId);
+                pageRef.current.onChange(blockId);
             }
         });
         return;
@@ -36,14 +36,14 @@ export function PageTextBlock({ blockId, data, pageRef, children, ref }) {
         if (lines.filter((line) => line.trim() !== "").length === 0) {
             textInputRef.current.innerText = "";
             pageRef.current.content[blockId].textContent = "";
-            pageRef.current.sendChange(blockId);
+            pageRef.current.onChange(blockId);
             return;
         }
 
         //Update the current block to be the first line
         textInputRef.current.innerText = lines[0];
         pageRef.current.content[blockId].textContent = lines[0];
-        pageRef.current.sendChange(blockId);
+        pageRef.current.onChange(blockId);
 
         //For each additional line, add a new text block with that line as the content
         let previousBlockId = blockId;
@@ -79,7 +79,7 @@ export function PageTextBlock({ blockId, data, pageRef, children, ref }) {
 
             pageRef.current.content[blockId].textContent =
                 newTextContent;
-            pageRef.current.sendChange(blockId);
+            pageRef.current.onChange(blockId);
             currentTextContent.current = data.textContent || "";
             if (data.textContent.trim() === "") {
                 textInputRef.current.classList.add("showplaceholder");
@@ -146,7 +146,7 @@ export function PageTextBlock({ blockId, data, pageRef, children, ref }) {
 
     return (
         <>
-            <div ref={ref} className="page_text_block_container">
+            <div ref={blockRef} className="page_text_block_container">
                 <div
                     className={
                         "text_box text_box_" + (data.subtype || "unknown")

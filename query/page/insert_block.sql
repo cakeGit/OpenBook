@@ -21,3 +21,7 @@ WHERE $Type = 'drawing_canvas';
 REPLACE INTO ImageBlocks (BlockID, ResourceID)
 SELECT $BlockID, $ResourceID
 WHERE $Type = 'image';
+
+REPLACE INTO AssignmentBlocks (BlockID, DescriptionText, LinkText, DueDate, Completed)
+SELECT $BlockID, $DescriptionText, $LinkText, $DueDate, $Completed
+WHERE $Type = 'assignment';

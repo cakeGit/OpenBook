@@ -30,6 +30,8 @@ export function PageBlockWrapperComponent({
 
     const hidesAddButton =
         BLOCK_TYPE_REGISTRY[data.type]?.hidesAddButton || false;
+    const hidesDragButton =
+        BLOCK_TYPE_REGISTRY[data.type]?.hidesDragButton || false;
 
     function handleOpenOptionsClick(e) {
         e.preventDefault();
@@ -159,16 +161,18 @@ export function PageBlockWrapperComponent({
                             </div>
                         </div>
                     )}
-                    <button
-                        ref={draggerRef}
-                        onMouseDown={onDraggerMouseDown}
-                        className={
-                            "page_block_dragger " +
-                            (optionsOpen ? "expanded_dragger" : "")
-                        }
-                    >
-                        <BsThreeDotsVertical />
-                    </button>
+                    {!hidesDragButton ? (
+                        <button
+                            ref={draggerRef}
+                            onMouseDown={onDraggerMouseDown}
+                            className={
+                                "page_block_dragger " +
+                                (optionsOpen ? "expanded_dragger" : "")
+                            }
+                        >
+                            <BsThreeDotsVertical />
+                        </button>
+                    ) : null}
                     {!hidesAddButton ? (
                         <button
                             onMouseDown={createAddBlockHandler(

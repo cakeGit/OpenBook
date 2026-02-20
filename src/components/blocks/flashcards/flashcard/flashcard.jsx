@@ -41,7 +41,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
             //Send this to the server
             pageRef.current.content[blockId][textDataKey] =
                 textInputRef.current.innerText;
-            pageRef.current.sendChange(blockId);
+            pageRef.current.onChange(blockId);
 
             //Update the placeholder visibility
             if (data[textDataKey]?.trim() === "") {
@@ -76,7 +76,7 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
             delete pageRef.current.content[blockId][canvasDataKey];
             setIsCanvas(false);
         }
-        pageRef.current.sendChange(blockId);
+        pageRef.current.onChange(blockId);
     }
 
     //Options for the select dropdown to choose flashcard type
