@@ -8,7 +8,6 @@ export function CurrentLoginUserInfo() {
         return await fetchApi("get_current_user_info");
     });
     if (loading || error) return <></>;
-    console.log("Current user info data:", data);
     return (
         <div className="current_login_user_info">
             {/* Google pretty much always blocks localhost from displaying the profile picture, so we add referrerpolicy="no-referrer", which basically hides the origin */}

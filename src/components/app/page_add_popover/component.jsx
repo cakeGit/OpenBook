@@ -119,7 +119,6 @@ export function PageAddBlockPopover({ pageRef }) {
     //The function used to actually place the block on the page
     //This may be called by pressing enter and placing the top result, or by clicking the block in the reults
     function submitAndPlace(registryEntryId) {
-        console.log("Submitting and placing block of type:", registryEntryId);
         pageRef.current.createNewBlock(
             BLOCK_REGISTRY[registryEntryId].type, //Convert the registry id, i.e "textHeader", to the actual block type, i.e. "text"
             adjacentBlockIdRef.current,

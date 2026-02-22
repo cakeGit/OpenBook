@@ -121,7 +121,6 @@ export function createDragHandler(blockId, pageRef, wrapperRef, highlightRef) {
             window.blockHighlightElement.style.left = `0px`;
 
             document.body.appendChild(window.blockHighlightElement);
-            console.log("Highlight created");
         }
 
         var shouldMoveHighlightInstantly = true; //To avoid initial animation glitch

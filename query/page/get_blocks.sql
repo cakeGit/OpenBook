@@ -7,6 +7,8 @@ SELECT
     FlashcardBlocks.BackText,
     FlashcardBlocks.FrontCanvasDocumentData,
     FlashcardBlocks.BackCanvasDocumentData,
+    FlashcardBlocks.FrontImageResourceID,
+    FlashcardBlocks.BackImageResourceID,
     FlashcardBlocks.FlashcardLinkID,
     DrawingCanvasBlocks.DocumentData,
     ImageBlocks.ResourceID,

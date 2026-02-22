@@ -1,6 +1,7 @@
 SELECT
 FrontText, BackText,
 FrontCanvasDocumentData, BackCanvasDocumentData,
+FrontImageResourceID, BackImageResourceID,
 LastLearnedTime,
 FlashcardBlocks.FlashcardLinkID,
 (LearningHistory & 3) AS LearningHistory1,

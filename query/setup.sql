@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS FlashcardBlocks (
     BackText TEXT,
     FrontCanvasDocumentData BLOB,
     BackCanvasDocumentData BLOB,
+    FrontImageResourceID BLOB,
+    BackImageResourceID BLOB,
     FlashcardLinkID BLOB --Link to the flashcard in the learning history table
 );
 

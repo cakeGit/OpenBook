@@ -3,26 +3,46 @@ import "./flashcard.css";
 import { Tldraw } from "tldraw";
 import { createPortal } from "react-dom";
 import { useCanvasEditorHelper } from "../../foundation/useCanvasEditorHelper";
-import { MdDraw, MdTextFields } from "react-icons/md";
+import { MdDraw, MdImage, MdTextFields } from "react-icons/md";
 import { CanvasDisplay } from "../../../flashcard/canvas_display/canvasDisplay.jsx";
 import Select from "react-select";
+import { useOpenCv } from "opencv-react";
+import { useModal } from "../../../../foundation/modals/genericModal";
+import { createOpenImageAddModal } from "./flashcardAddImageModaHelper.jsx";
 
 function FlashcardSide({ side, data, pageRef, blockId }) {
     const textInputRef = useRef(null);
+    const modalHook = useModal();
+    const { loaded: isOpenCvLoaded, cv } = useOpenCv();
     //These data keys are constructed based on the side (front/back)
     //Since the logic is the same but the fields are different, we can access the fields like data["frontText"] instead of data.frontText
     const textDataKey = side + "Text";
     const canvasDataKey = side + "CanvasDocumentData";
+    const imageDataKey = side + "ImageResourceId";
 
     //State for if this side is a canvas or text flashcard, needed to re-render
     // since the structure of the flashcard itself changes, not just the flashcard content
     const [isCanvas, setIsCanvas] = useState(data[canvasDataKey] != undefined);
+    const [isImage, setIsImage] = useState(
+        data[imageDataKey] != undefined && data[canvasDataKey] == undefined,
+    );
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const [currentImageResourceId, setCurrentImageResourceId] = useState(
+        data[imageDataKey],
+    );
+    const [isImageUploading, setIsImageUploading] = useState(false);
 
     //Keep the state of isCanvas in sync with data changes from the server
     useEffect(() => {
         setIsCanvas(data[canvasDataKey] != undefined);
     }, [data[canvasDataKey]]);
+
+    useEffect(() => {
+        setCurrentImageResourceId(data[imageDataKey]);
+        setIsImage(
+            data[imageDataKey] != undefined && data[canvasDataKey] == undefined,
+        );
+    }, [data[imageDataKey]]);
 
     //Use the editor helper module to get the editor logic
     const { setEditor } = useCanvasEditorHelper(
@@ -70,23 +90,53 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
         if (value === "canvas") {
             //"Switch" to canvas (define it as an empty canvas)
             pageRef.current.content[blockId][canvasDataKey] = "";
+            delete pageRef.current.content[blockId][imageDataKey];
             setIsCanvas(true);
-        } else {
-            //"Switch" to text (clear non text data)
+            setIsImage(false);
+            setCurrentImageResourceId(undefined);
+        } else if (value === "image") {
+            //"Switch" to image (clear non-image mode data)
             delete pageRef.current.content[blockId][canvasDataKey];
             setIsCanvas(false);
+            setIsImage(true);
+        } else {
+            //"Switch" to text (clear non-text mode data)
+            delete pageRef.current.content[blockId][canvasDataKey];
+            delete pageRef.current.content[blockId][imageDataKey];
+            setIsCanvas(false);
+            setIsImage(false);
+            setCurrentImageResourceId(undefined);
         }
         pageRef.current.onChange(blockId);
     }
+
 
     //Options for the select dropdown to choose flashcard type
     const selectOptions = [
         { value: "text", label: <MdTextFields /> }, //The label is a react-icons icon
         { value: "canvas", label: <MdDraw /> },
+        { value: "image", label: <MdImage /> },
     ];
+
+    const selectedStyle = isCanvas ? "canvas" : isImage ? "image" : "text";
+
+    //This includes all the methods directly related to image upload, they have been moved into a module
+    //Only the openImageAddModal method is needed here, so after we make teh functions just that is returned
+    const openAddImageModal = createOpenImageAddModal(
+        modalHook,
+        pageRef,
+        blockId,
+        imageDataKey,
+        setCurrentImageResourceId,
+        setIsImage,
+        setIsImageUploading,
+        isOpenCvLoaded,
+        cv,
+    );
 
     return (
         <div className={"flashcard_side flashcard_side_" + side}>
+            {modalHook.render()}
             {isCanvas ? ( //If this is a canvas flashcard, show the canvas display
                 <>
                     <div
@@ -136,6 +186,29 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
                 </>
             ) : null}
 
+            {(isImage && !isCanvas) ? (
+                currentImageResourceId ? (
+                    <img
+                        src={`/image/${currentImageResourceId}`}
+                        alt={`${side} flashcard side image`}
+                        className="flashcard_side_image"
+                        onClick={openAddImageModal}
+                    />
+                ) : (
+                    <div
+                        className="flashcard_image_placeholder"
+                        onClick={openAddImageModal}
+                    >
+                        <span>Click to add image</span>
+                        {isImageUploading ? (
+                            <span className="flashcard_image_uploading">
+                                Uploading...
+                            </span>
+                        ) : null}
+                    </div>
+                )
+            ) : null}
+
             <div
                 className="flashcard_text_box"
                 contentEditable
@@ -152,7 +225,9 @@ function FlashcardSide({ side, data, pageRef, blockId }) {
                 <Select
                     className="flashcard_type_select"
                     unstyled={true}
-                    defaultValue={selectOptions[isCanvas ? 1 : 0]}
+                    value={selectOptions.find(
+                        (option) => option.value === selectedStyle,
+                    )}
                     options={selectOptions}
                     isSearchable={false}
                     classNamePrefix={"select"}

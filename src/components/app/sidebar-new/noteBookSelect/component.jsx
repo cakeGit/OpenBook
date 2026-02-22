@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 export function AppSidebarNoteBookSelect({ currentName, currentNotebookId }) {
     const { data, loading, error } = useApi(async () => {
         const response = await fetchApi("notebook/get_user_notebooks");
-        console.log("Fetched user notebooks", response);
         return response.notebooks.filter(
             (notebook) => notebook.notebookId !== currentNotebookId,
         ); // Remove the current notebook
@@ -42,7 +41,6 @@ export function AppSidebarNoteBookSelect({ currentName, currentNotebookId }) {
             closeSelect(); //Clicking an already open notebook select should just close it
             return;
         }
-        console.log("Opening notebook select");
         setSelectOpen(true);
         document.addEventListener("click", checkForClickOffSelect);
     }

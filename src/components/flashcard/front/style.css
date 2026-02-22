@@ -29,7 +29,7 @@
     background-color: var(--color-border);
 }
 
-.flashcard_task_front_canvas {
+.flashcard_task_front_media {
     width: 300px;
     max-height: 300px;
     border: 2px solid var(--color-border);
@@ -47,8 +47,12 @@
     color: var(--color-text-secondary);
 }
 
-.flashcard_task_front_with_canvas {
+.flashcard_task_front_with_media {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.flashcard_task_front_image {
+    width: 100%;
 }

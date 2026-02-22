@@ -126,6 +126,26 @@ export class StructureChangeOperation extends PageOperation {
     }
 }
 
+//Used for bulk operations like importing flashcards.
+export class InsertSegmentOperation extends PageOperation {
+    constructor(parentBlockId, index, segment) {
+        super();
+        this.parentBlockId = parentBlockId;
+        this.index = index;
+        this.segment = segment;
+    }
+
+    apply(page) {
+        page._placeSegment(this.segment, this.parentBlockId, this.index);
+        page.triggerStructureRerender?.();
+    }
+
+    revert(page) {
+        page._deleteBlock(this.segment.blockId);
+        page.triggerStructureRerender?.();
+    }
+}
+
 const operationTypes = {
     NewBlockOperation: NewBlockOperation,
     EditBlockOperation: EditBlockOperation,

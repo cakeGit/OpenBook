@@ -9,6 +9,7 @@ import { AppLineBreak } from "../line_break/component.jsx";
 import { VALID_PAGE_NAME } from "../../../../backend/web/foundation_safe/validations.js";
 import { createPortal } from "react-dom";
 import { UndoRedoFloatingButton } from "../undo_redo_floating_button/component.jsx";
+import { OpenCvProvider } from "opencv-react";
 
 //Methods we use for the display and handling of editing the page name
 function trySubmitNameChange(
@@ -29,7 +30,6 @@ function trySubmitNameChange(
     const validity = VALID_PAGE_NAME.test(newName);
     if (validity.isValid) {
         if (newName === pageRef.current.metadata.name) return; //Valid, but no change, ignore
-        console.log("Submitting name change to:", newName);
 
         pageRef.current.metadata.name = newName;
         pageNameRef.current.textContent = newName;
@@ -105,7 +105,7 @@ export function PageViewComponent({ pageId }) {
         //Create the net handler
         const pageNetHandler = new PageNetHandler(pageRef, ws);
         pageNetHandler.updateMetadata = (metadata) => {
-            pageCurrentNameRef.current = metadata.name
+            pageCurrentNameRef.current = metadata.name;
             if (pageNameRef.current) {
                 pageNameRef.current.textContent = metadata.name;
                 pageNameChangeRef.current.value = metadata.name;
@@ -130,61 +130,65 @@ export function PageViewComponent({ pageId }) {
     //React is actually strong enough to just handle updates to structure itself,
     // the full remount also causes incredible lag.
     return (
-        <Fragment>
-            {createPortal(
-                <UndoRedoFloatingButton pageRef={pageRef} />,
-                document.body,
-            )}
-            <h1>
-                {/*The name of the page, and the input box that takes its place when we edit it*/}
-                <span
-                    ref={pageNameRef}
-                    className="page_name_span"
-                    onClick={() =>
-                        startPageNameChange(pageNameRef, pageNameChangeRef)
-                    }
-                >{pageCurrentNameRef.current}</span>
-                <input
-                    ref={pageNameChangeRef}
-                    type="text"
-                    className="page_name_input"
-                    defaultValue={pageCurrentNameRef.current}
-                    style={{ display: "none" }}
-                    onBlur={() =>
-                        trySubmitNameChange(
-                            pageRef,
-                            pageNameChangeRef,
-                            linkedNetHandler,
-                            pageNameRef,
+        <OpenCvProvider>
+            <Fragment>
+                {createPortal(
+                    <UndoRedoFloatingButton pageRef={pageRef} />,
+                    document.body,
+                )}
+                <h1>
+                    {/*The name of the page, and the input box that takes its place when we edit it*/}
+                    <span
+                        ref={pageNameRef}
+                        className="page_name_span"
+                        onClick={() =>
+                            startPageNameChange(pageNameRef, pageNameChangeRef)
+                        }
+                    >
+                        {pageCurrentNameRef.current}
+                    </span>
+                    <input
+                        ref={pageNameChangeRef}
+                        type="text"
+                        className="page_name_input"
+                        defaultValue={pageCurrentNameRef.current}
+                        style={{ display: "none" }}
+                        onBlur={() =>
+                            trySubmitNameChange(
+                                pageRef,
+                                pageNameChangeRef,
+                                linkedNetHandler,
+                                pageNameRef,
+                            )
+                        }
+                        onSubmit={() =>
+                            trySubmitNameChange(
+                                pageRef,
+                                pageNameChangeRef,
+                                linkedNetHandler,
+                                pageNameRef,
+                            )
+                        }
+                    />
+                </h1>
+                <AppLineBreak />
+                <br />
+                <div ref={primaryContainerRef} className="page_view">
+                    {pageRef.current ? (
+                        pageRef.current.structure.children.length > 0 ? (
+                            renderChildBlocks(
+                                pageRef.current.structure.children,
+                                pageRef.current.content,
+                                pageRef,
+                            )
+                        ) : (
+                            <EmptyPageHint pageRef={pageRef} />
                         )
-                    }
-                    onSubmit={() =>
-                        trySubmitNameChange(
-                            pageRef,
-                            pageNameChangeRef,
-                            linkedNetHandler,
-                            pageNameRef,
-                        )
-                    }
-                />
-            </h1>
-            <AppLineBreak />
-            <br />
-            <div ref={primaryContainerRef} className="page_view">
-                {pageRef.current ? (
-                    pageRef.current.structure.children.length > 0 ? (
-                        renderChildBlocks(
-                            pageRef.current.structure.children,
-                            pageRef.current.content,
-                            pageRef,
-                        )
-                    ) : (
-                        <EmptyPageHint pageRef={pageRef} />
-                    )
-                ) : null}
+                    ) : null}
 
-                <PageAddBlockPopover pageRef={pageRef} />
-            </div>
-        </Fragment>
+                    <PageAddBlockPopover pageRef={pageRef} />
+                </div>
+            </Fragment>
+        </OpenCvProvider>
     );
 }

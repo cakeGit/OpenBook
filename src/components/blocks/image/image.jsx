@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./image.css";
 import { LuMousePointerClick } from "react-icons/lu";
+import { uploadImageToServer } from "../foundation/imageUpload";
 
 //The method called with the upload
 async function tryUploadImage(
@@ -12,34 +13,18 @@ async function tryUploadImage(
 ) {
     setIsUploading(true);
 
-    //Create form data to submit
-    const formData = new FormData();
     const fileField = event.target;
 
-    //Add the first file submitted (we only accept 1 anyways)
-    formData.append("image", fileField.files[0]);
-
-    //Call upload api
-    fetch("http://localhost:3000/api/upload_image", {
-        method: "POST",
-        body: formData,
-    })
-        .then((response) => response.json())
-        .then((result) => {
-            //Apply the new image resource as the source of this image in the page
-            pageRef.current.content[blockId].resourceId =
-                result.imageResourceId;
+    uploadImageToServer(fileField.files[0])
+        .then((imageResourceId) => {
+            pageRef.current.content[blockId].resourceId = imageResourceId;
             pageRef.current.onChange(blockId);
-
-            //Update the image resource id we are rendering ourselves
-            setCurrentImageResourceId(result.imageResourceId);
-            //Clear the uploading state
+            setCurrentImageResourceId(imageResourceId);
             setIsUploading(false);
         })
         .catch((error) => {
             alert("Error in uploading image:", error);
             console.error(error);
-            //Clear the uploading state, which will mean the user can try again
             setIsUploading(false);
         });
 }

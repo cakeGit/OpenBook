@@ -31,6 +31,36 @@
     flex: 1;
 }
 
+.flashcard_side_image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    background-color: var(--color-pure-background);
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.flashcard_image_placeholder {
+    width: 100%;
+    min-height: 200px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--color-pure-background);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    gap: 4px;
+}
+
+.flashcard_image_uploading {
+    font-size: 0.85rem;
+}
+
 .flashcard_text_box:focus {
     border: 2px solid var(--color-soft-accent);
 }
@@ -145,4 +175,93 @@
 .select__menu > * > *:hover {
     background-color: var(--color-accent);
     color: white;
+}
+
+.flashcard_image_modal_content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 360px;
+    color: var(--color-pure-text);
+}
+
+.flashcard_image_modal_content h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--color-pure-text);
+}
+
+.flashcard_image_modal_body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.flashcard_image_modal_checkbox_row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flashcard_image_modal_hidden_input {
+    display: none;
+}
+
+.flashcard_image_modal_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.flashcard_image_preview_modal_content {
+    min-width: 560px;
+}
+
+.flashcard_image_preview_body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 5px;
+}
+
+.flashcard_image_preview_instruction {
+    margin: 0 0 5px 0;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+.flashcard_image_preview_cropper_container {
+    flex: 1;
+}
+
+.flashcard_image_preview_cropper_wrapper {
+    border: 2px solid var(--color-border);
+    border-radius: 4px;
+    max-height: 40vh;
+    overflow: hidden;
+    background-color: var(--color-pure-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flashcard_image_preview_result_wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 50px;
+}
+
+.flashcard_image_preview_result {
+    height: 75px;
+    border: 2px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-pure-background);
+    position: absolute;
+    bottom: 0;
+}
+
+.flashcard_image_modal_camera_container {
+    position: relative;
 }
