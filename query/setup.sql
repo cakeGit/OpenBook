@@ -60,6 +60,11 @@ CREATE TABLE IF NOT EXISTS TextBlocks (
     Subtype TEXT --Null means normal, but could be "header"
 );
 
+CREATE TABLE IF NOT EXISTS MathBlocks (
+    BlockID BLOB PRIMARY KEY,
+    MathContent TEXT
+);
+
 CREATE TABLE IF NOT EXISTS FlashcardBlocks (
     BlockID BLOB PRIMARY KEY,
     FrontText TEXT,

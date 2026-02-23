@@ -1,0 +1,7 @@
+.math_box {
+    padding: 8px;
+    border: 1px dashed #ccc;
+    background: #fafafa;
+    min-width: 100px;
+    text-align: center;
+}

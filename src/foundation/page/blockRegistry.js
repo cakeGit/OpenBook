@@ -29,5 +29,10 @@ export const BLOCK_REGISTRY = {
         name: "Image",
         description: "A block for displaying an image.",
         type: "image",
+    },
+    maths: {
+        name: "Maths",
+        description: "Write mathematical equations quicky",
+        type: "maths",
     }
 };

@@ -136,6 +136,14 @@ export function PageViewComponent({ pageId }) {
                     <UndoRedoFloatingButton pageRef={pageRef} />,
                     document.body,
                 )}
+                {createPortal(
+                    <>
+                        <link rel="stylesheet" href="/mathquill-0.10.1/mathquill.css" />
+                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+                        <script src="/mathquill-0.10.1/mathquill.js"></script>
+                    </>,
+                    document.head,
+                )}
                 <h1>
                     {/*The name of the page, and the input box that takes its place when we edit it*/}
                     <span

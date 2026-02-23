@@ -3,6 +3,7 @@ import { PageFlashcardsBlock } from "../../components/blocks/flashcards/containe
 import { PageTextFlashcardBlock } from "../../components/blocks/flashcards/flashcard/flashcard";
 import { PageDrawingCanvasBlock } from "../../components/blocks/drawing_canvas/drawingCanvas";
 import { PageImageBlock } from "../../components/blocks/image/image";
+import { PageMathBlock } from "../../components/blocks/math/math.jsx";
 import { PageAssignmentsContainerBlock } from "../../components/blocks/assignments_container/assignment_container.jsx";
 import { PageAssignmentBlock } from "../../components/blocks/assignment/assignment.jsx";
 
@@ -56,6 +57,9 @@ export const BLOCK_TYPE_REGISTRY = {
     },
     drawing_canvas: {
         component: PageDrawingCanvasBlock,
+    },
+    maths: {
+        component: PageMathBlock,
     },
     image: {
         component: PageImageBlock,
