@@ -119,6 +119,17 @@ export class MutablePage {
         return parentBlockId;
     }
 
+    /**
+     * Get the "sibling" block IDs, where they are in the same container (root or child of another block) as the given ID
+     */
+    _itterateSiblingIds(blockId) {
+        let siblingIds = [];
+        this._findAndPerform(blockId, (children, index, parentBlockId) => {
+            siblingIds = children.map((child) => child.blockId);
+        });
+        return siblingIds;
+    }
+
     //Get a copy of a block and its children from the structure and content
     _getSegment(blockId, shuffleIds = false) {
         //Find the structure node

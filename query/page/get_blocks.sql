@@ -3,6 +3,7 @@ SELECT
     Blocks.*, 
     TextBlocks.TextContent, 
     TextBlocks.Subtype, 
+    MathBlocks.MathContent,
     FlashcardBlocks.FrontText, 
     FlashcardBlocks.BackText,
     FlashcardBlocks.FrontCanvasDocumentData,
@@ -23,5 +24,6 @@ LEFT JOIN FlashcardBlocks ON Blocks.BlockID = FlashcardBlocks.BlockID AND Blocks
 LEFT JOIN DrawingCanvasBlocks ON Blocks.BlockID = DrawingCanvasBlocks.BlockID AND Blocks.Type = 'drawing_canvas'
 LEFT JOIN ImageBlocks ON Blocks.BlockID = ImageBlocks.BlockID AND Blocks.Type = 'image'
 LEFT JOIN AssignmentBlocks ON Blocks.BlockID = AssignmentBlocks.BlockID AND Blocks.Type = 'assignment'
+LEFT JOIN MathBlocks ON Blocks.BlockID = MathBlocks.BlockID AND Blocks.Type = 'math'
 
 WHERE Blocks.PageID = ?;

@@ -140,7 +140,8 @@ export function PageViewComponent({ pageId }) {
                     <>
                         <link rel="stylesheet" href="/mathquill-0.10.1/mathquill.css" />
                         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-                        <script src="/mathquill-0.10.1/mathquill.js"></script>
+                        <script src="/mathquill-0.10.1/mathquill.js"></script>                      
+                        <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css"/>
                     </>,
                     document.head,
                 )}
@@ -197,6 +198,7 @@ export function PageViewComponent({ pageId }) {
                     <PageAddBlockPopover pageRef={pageRef} />
                 </div>
             </Fragment>
+            <script src="https://unpkg.com/pell"></script> 
         </OpenCvProvider>
     );
 }

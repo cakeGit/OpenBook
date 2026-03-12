@@ -17,19 +17,19 @@ export class LocalPage extends MutablePage {
     performAndSendOperation(operation) {
         this.performOperation(operation);
         this.checkForNetAndRun(() =>
-            this.linkedNetHandler.sendOperation(operation)
+            this.linkedNetHandler.sendOperation(operation),
         );
     }
 
     requestHistoryAction(action) {
         this.checkForNetAndRun(() =>
-            this.linkedNetHandler.sendHistoryRequest(action)
+            this.linkedNetHandler.sendHistoryRequest(action),
         );
     }
 
     removeSubcontainer(refToRemove) {
         this.subcontainers = this.subcontainers.filter(
-            (container) => container.ref !== refToRemove
+            (container) => container.ref !== refToRemove,
         );
     }
 
@@ -48,7 +48,8 @@ export class LocalPage extends MutablePage {
         const parentBlockId = this.getParentBlockIdOfBlock(blockId);
 
         //Get the type of the block changed, and look for if a childSorting
-        const blockType = BLOCK_TYPE_REGISTRY[this.content[parentBlockId]?.type];
+        const blockType =
+            BLOCK_TYPE_REGISTRY[this.content[parentBlockId]?.type];
         const childSorting = blockType?.childSorting;
         if (childSorting) {
             //Can now just call triggerRerenderChildren (maintaining the same ?)
@@ -61,20 +62,20 @@ export class LocalPage extends MutablePage {
         this.checkForNetAndRun(() =>
             this.linkedNetHandler.sendBlockChange(
                 blockId,
-                this.content[blockId]
-            )
+                this.content[blockId],
+            ),
         );
     }
 
     sendStructureChange(newStructure) {
         this.checkForNetAndRun(() =>
-            this.linkedNetHandler.sendStructureChange(newStructure)
+            this.linkedNetHandler.sendStructureChange(newStructure),
         );
     }
 
     sendDeleted(blockId) {
         this.checkForNetAndRun(() =>
-            this.linkedNetHandler.sendBlockDeletion(blockId)
+            this.linkedNetHandler.sendBlockDeletion(blockId),
         );
     }
 
@@ -84,22 +85,30 @@ export class LocalPage extends MutablePage {
                 adjacentBlockId,
                 newBlockId,
                 this.content[newBlockId],
-                direction
-            )
+                direction,
+            ),
         );
     }
 
     createNewBlockInside(blockType, parentBlockId, initialData = {}) {
         const newBlockId = globalThis.crypto.randomUUID();
-        this._addBlock(parentBlockId, newBlockId, { type: blockType, ...initialData }, "inside");
+        this._addBlock(
+            parentBlockId,
+            newBlockId,
+            { type: blockType, ...initialData },
+            "inside",
+        );
         this.sendNewBlock(parentBlockId, newBlockId, "inside");
         this.triggerStructureRerender();
         return newBlockId;
-    }   
+    }
 
     createNewBlock(blockType, blockIdBelow, initialData = {}) {
         const newBlockId = globalThis.crypto.randomUUID();
-        this._addBlock(blockIdBelow, newBlockId, { type: blockType, ...initialData });
+        this._addBlock(blockIdBelow, newBlockId, {
+            type: blockType,
+            ...initialData,
+        });
 
         this.sendNewBlock(blockIdBelow, newBlockId);
         this.triggerStructureRerender();
@@ -109,7 +118,7 @@ export class LocalPage extends MutablePage {
     addTargetableSubcomponentContainer(subcontainer) {
         // Avoid duplicates by checking if this ref is already registered
         const existingIndex = this.subcontainers.findIndex(
-            (container) => container.ref === subcontainer.ref
+            (container) => container.ref === subcontainer.ref,
         );
 
         if (existingIndex === -1) {
@@ -151,18 +160,27 @@ export class LocalPage extends MutablePage {
         this.revalidateSubcontainers();
 
         //Get current block container type
-        const currentBlockContainerType = blockId ? BLOCK_TYPE_REGISTRY[this.content[blockId]?.type]?.containerType : undefined;
+        const currentBlockContainerType = blockId
+            ? BLOCK_TYPE_REGISTRY[this.content[blockId]?.type]?.containerType
+            : undefined;
 
         const containers = [
             ...this.subcontainers
                 .filter((c) => c.canTarget())
-                .filter((c) => currentBlockContainerType === undefined || c.containerType === currentBlockContainerType)
+                .filter(
+                    (c) =>
+                        currentBlockContainerType === undefined ||
+                        c.containerType === currentBlockContainerType,
+                )
                 .map((c) => ({ element: c.ref.current, blockId: c.blockId })),
         ];
 
         //Add the root ONLY if it matches the container type
         if (currentBlockContainerType === undefined) {
-            containers.push({ element: this.primaryContainerRef.current, blockId: undefined });
+            containers.push({
+                element: this.primaryContainerRef.current,
+                blockId: undefined,
+            });
         }
 
         return containers;
@@ -171,7 +189,9 @@ export class LocalPage extends MutablePage {
     getLocalHash() {
         const contentForHash = {};
         for (const blockId in this.content) {
-            contentForHash[blockId] = getCleanNetworkBlockData(this.content[blockId])
+            contentForHash[blockId] = getCleanNetworkBlockData(
+                this.content[blockId],
+            );
         }
         const contentString = JSON.stringify(contentForHash);
         const structureString = JSON.stringify(this.structure);
@@ -179,4 +199,30 @@ export class LocalPage extends MutablePage {
         return hashValue;
     }
 
+    /**
+     * For a given block (as well as its type and subtype),
+     * this will find the number within a "run" which would represent its order.
+     * I.e:
+     * [Number 1] Text one
+     * [Number 2] Text two
+     * [Number 1] (Header) Text three
+     * [Number 1] Text four
+     * This means indexes start at 1.
+     * Note that this is observing just the page structure to minimise state in block rendering,
+     * if any sorting is applied then this will not represent the actual number of a displayed run.
+     */
+    getNumberInSubtypeRun(blockId, type, subtype) {
+        let index = 1;
+        for (const siblingId of this._itterateSiblingIds(blockId)) {
+            if (siblingId === blockId) {
+                return index;
+            }
+            if (this.content[siblingId].subtype === subtype && this.content[siblingId].type === type) {
+                index++;
+            } else {
+                index = 1;
+            }
+        }
+        return 1;
+    }
 }

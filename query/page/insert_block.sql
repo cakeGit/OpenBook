@@ -25,3 +25,7 @@ WHERE $Type = 'image';
 REPLACE INTO AssignmentBlocks (BlockID, DescriptionText, LinkText, DueDate, Completed)
 SELECT $BlockID, $DescriptionText, $LinkText, $DueDate, $Completed
 WHERE $Type = 'assignment';
+
+REPLACE INTO MathBlocks (BlockID, MathContent)
+SELECT $BlockID, $MathContent
+WHERE $Type = 'math';

@@ -3,7 +3,8 @@ import "./text.css";
 import { useTargetableSubcomponentContainer } from "../foundation/useTargetableSubcomponentContainer.jsx";
 import { AppLineBreak } from "../../app/line_break/component.jsx";
 import { DeleteBlockOperation } from "../../../../backend/web/foundation_safe/page/pageOperations.js";
-
+import DOMPurify from "dompurify";
+import { onBlurTextAdditionalStyles, onKeyDownForTextAdditionalStyles, onSelectionChange } from "./textAdditionalStyleHelper.jsx";
 let textRenderAutofocusId = null; //Used to make the next time a text block renders of this id to focus the box
 
 export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
@@ -18,7 +19,7 @@ export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
     function handlePlusShortcut(newTextContent) {
         let removedPlus = newTextContent.slice(0, -1);
         textInputRef.current.innerText = removedPlus;
-        pageRef.current.openAddBlockPopover(blockId, ref, () => {
+        pageRef.current.openAddBlockPopover(blockId, blockRef, () => {
             //On blur / they exit from the add block popover, put the text (with +) back
             if (textInputRef.current) {
                 textInputRef.current.innerText = newTextContent;
@@ -63,31 +64,30 @@ export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
 
     function handleTextChanged(e) {
         if (textInputRef.current) {
-            let newTextContent = textInputRef.current.innerText;
+            let newHtmlContent = DOMPurify.sanitize(textInputRef.current.innerHTML);
 
             //If they type a +, trigger the add block popover
-            if (newTextContent.endsWith("+")) {
-                handlePlusShortcut(newTextContent);
+            if (newHtmlContent.endsWith("+")) {
+                handlePlusShortcut(newHtmlContent);
                 return;
             }
 
             //If there is a new line, split the block
-            if (newTextContent.includes("\n")) {
-                handleNewlineSplit(newTextContent);
+            if (newHtmlContent.includes("\n")) {
+                handleNewlineSplit(newHtmlContent);
                 return;
             }
 
-            pageRef.current.content[blockId].textContent =
-                newTextContent;
+            pageRef.current.content[blockId].textContent = newHtmlContent;
             pageRef.current.onChange(blockId);
-            currentTextContent.current = data.textContent || "";
-            if (data.textContent.trim() === "") {
+            currentTextContent.current = newHtmlContent || "";
+            if (newHtmlContent.trim() === "") {
                 textInputRef.current.classList.add("showplaceholder");
             } else {
                 textInputRef.current.classList.remove("showplaceholder");
             }
         }
-    };
+    }
 
     function putSelectionAtEnd(element) {
         //Code from artificialworlds.net
@@ -104,7 +104,7 @@ export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
         if (e.key === "Backspace" && textInputRef.current.innerText === "") {
             e.preventDefault();
 
-            //try find if there is a text block before this one, if so, focus now
+            //Try find if there is a text block before this one, if so, focus now
             let previousBlock = pageRef.current.getPreviousBlock(blockId);
             if (previousBlock && previousBlock.type === "text") {
                 //If we have a valid previous text block, try focus it
@@ -127,9 +127,10 @@ export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
 
     useEffect(() => {
         if (data.textContent !== currentTextContent.current) {
-            textInputRef.current.innerText = data.textContent || "";
-            currentTextContent.current = data.textContent || "";
-            if (!data.textContent || data.textContent.trim() === "") {
+            const sanitizedContent = DOMPurify.sanitize(data.textContent || "");
+            textInputRef.current.innerHTML = sanitizedContent;
+            currentTextContent.current = sanitizedContent;
+            if (!sanitizedContent || sanitizedContent.trim() === "") {
                 textInputRef.current.classList.add("showplaceholder");
             } else {
                 textInputRef.current.classList.remove("showplaceholder");
@@ -144,26 +145,50 @@ export function PageTextBlock({ blockId, data, pageRef, children, blockRef }) {
         }
     }, [textInputRef]);
 
+    //If this is a numbered block, check for previous block to get the number for this block
+    const thisNumber =
+        data.subtype === "numbered"
+            ? pageRef.current.getNumberInSubtypeRun(blockId, "text", "numbered")
+            : null;
+
     return (
-        <>
-            <div ref={blockRef} className="page_text_block_container">
-                <div
-                    className={
-                        "text_box text_box_" + (data.subtype || "unknown")
-                    }
-                    contentEditable
-                    /*onClick={handleTextClick}*/ /*onBlur={handleTextLeave}*/ onInput={
-                        handleTextChanged
-                    }
-                    ref={textInputRef}
-                    onKeyDown={handlePotentialDelete}
-                    placeholder="Write text here... Type + to add blocks"
-                ></div>
+        <div
+            ref={blockRef}
+            className={`page_text_block_container ${data.subtype ? "page_text_block_container_" + data.subtype : ""}`}
+        >
+            <div className="page_text_block_inner_container">
+                {data.subtype === "numbered" ? (
+                    <div className="text_box_number">{thisNumber}.&nbsp;</div>
+                ) : data.subtype === "bullet" ? (
+                    <div className="text_box_bullet">•&nbsp;</div>
+                ) : null}
+                <div className="text_box_container">
+                    <div
+                        className={
+                            "text_box text_box_" + (data.subtype || "unknown")
+                        }
+                        contentEditable
+                        onBlur={onBlurTextAdditionalStyles}
+                        onInput={
+                            handleTextChanged
+                        }
+                        onKeyDown={(e) => {
+                            onKeyDownForTextAdditionalStyles(e);
+                            handlePotentialDelete(e);
+                        }}
+                        onSelect={onSelectionChange}
+                        ref={textInputRef}
+                        placeholder="Write text here... Type + to add blocks"
+                    ></div>
+                </div>
             </div>
-            {data.subtype === "header" ? (
-                <AppLineBreak className="text_header_underline" />
-            ) : null}
-            {subcontainerElement}
-        </>
+            <div className="text_block_secondary_container">
+                {data.subtype === "header" ||
+                data.subtype === "header_small" ? (
+                    <AppLineBreak className="text_header_underline" />
+                ) : null}
+                {subcontainerElement}
+            </div>
+        </div>
     );
 }

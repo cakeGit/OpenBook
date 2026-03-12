@@ -30,7 +30,6 @@ export const BLOCK_TYPE_REGISTRY = {
 
             if (completedA !== completedB) {
                 //Implcitly turn the boolean into a number (false = 0, true = 1) and subtract to get the order (complete stuff at the end)
-                console.log("Branch 1 value ", completedA - completedB, completedA, completedB);
                 return completedA - completedB;
             }
             //Otherwise, just sort by due date, earliest first
@@ -39,10 +38,6 @@ export const BLOCK_TYPE_REGISTRY = {
             //Infinity cannot be used as Infinity - Infinity is NaN, which breaks the sorting, but MAX_SAFE_INTEGER works fine
             const dueDateA = blockA.dueDate || Number.MAX_SAFE_INTEGER;
             const dueDateB = blockB.dueDate || Number.MAX_SAFE_INTEGER;
-            console.log("Branch 2 value ", (
-                (completedA ? -1 : 1) * //Flip the order if completed (at this point they arethe same)
-                (dueDateA - dueDateB)
-            ), completedA, completedB, dueDateA, dueDateB);
             return (
                 (completedA ? -1 : 1) * //Flip the order if completed (at this point they arethe same)
                 (dueDateA - dueDateB)

@@ -4,6 +4,11 @@
     gap: 8px;
 }
 
+.assignments_block_content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
 .assignment_add_button {
     align-self: center;
 }

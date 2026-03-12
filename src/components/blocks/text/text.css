@@ -1,6 +1,17 @@
+.text_box_header, .text_box_header_small {
+    font-weight: bold;
+}
+
 .text_box_header {
     font-size: 1.5em;
-    font-weight: bold;
+}
+
+.text_box_header_small {
+    font-size: 1.25em;
+}
+
+.text_box_quote {
+    font-style: italic;
 }
 
 .text_box {
@@ -8,6 +19,8 @@
     box-sizing: border-box;
     border-radius: 2px;
     padding: 2px;
+    line-height: 1.5;
+    min-height: 1.5em;
 }
 
 .text_box:focus {
@@ -15,9 +28,58 @@
     padding: 0;
 }
 
+.page_text_block_inner_container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: stretch;
+    min-height: 1em;
+    flex: 1;
+}
+
+.page_text_block_container > .text_box_container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    flex: 1;
+}
+
 .page_text_block_container {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
+    justify-content: flex-start;
+    flex: 1;
+}
+
+.page_text_block_secondary_container {
+    flex: 0;
+}
+
+.text_box, .text_box_container {
+    flex: 1;
+}
+
+.text_box_number, .text_box_bullet, .text_box_container {
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+}
+
+.page_text_block_container_quote {
+    border-left: 4px solid var(--color-border);
+    padding-left: 6px;
+}
+
+.page_text_block_container_callout {
+    border: 2px solid var(--color-border);
+    background-color: var(--color-background-secondary);
+    padding: 8px;
+    margin: 2px;
+    border-radius: 10px;
+}
+
+.text_highlight_span {
+    background-color: yellow;
 }
